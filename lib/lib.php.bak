@@ -54,7 +54,7 @@ function knowledgefox_grade_update($instance, $grades=null) {
 function knowledgefox_output_get_json_content($val){
 	$pos = strpos($val, "application/json");
 	if ($pos === false) {
-	    return false;
+	    
 	} else {
 			$pos=$pos+17;
 	    $val=substr($val,$pos);
@@ -67,84 +67,17 @@ function knowledgefox_output_get_json_content($val){
 	}
 	return $val;
 }
-function knowledgefox_output_get_json_statuscode($val){
-	$pos = strpos($val, "HTTP/1.1 ");
-	if ($pos === false) {
-	    return false;
-	} else {
-			$pos=$pos+9;
-	    $val=substr($val,$pos);
-	    $posend=strpos($val, " ");
-	    if ($posend === false) {
-			} else {
-				$val=substr($val,0,$posend);
-			}
-	    return "".$val;
-	}
-}
-function knowledgefox_output_get_json_statustext($val){
-	$pos = strpos($val, "HTTP/1.1 ");
-	if ($pos === false) {
-	    return false;
-	} else {
-			$pos=$pos+13;
-	    $val=substr($val,$pos);
-	    $posend=strripos($val, "date:");
-	    if ($posend === false) {
-			} else {
-				$val=substr($val,0,$posend-1);
-			}
-	   return ", ".$val.".";
-	}
-	
-}
+
 function knowledgefox_user_is_ingroup($kf_user,$kfgroupname){
 		foreach($kf_user->groupTitles as $grouptitle){
 			if($grouptitle==$kfgroupname) {return true; exit;}
 		}
 		return false;
 }
-function knowledgefox_get_students_by_course($courseid) {
 
-	$context = context_course::instance($courseid);
-	$students = get_users_by_capability($context, 'mod/knowledgefox:student', '', 'lastname,firstname');
-
-	// TODO ggf user mit exacomp:teacher hier filtern?
-	return $students;
-}
-function knowledgefox_is_in_kfuserslist($username,$kf_users){
-	foreach ($kf_users as $kf_user){
-		if ($kf_user->username==$username) {
-			return $kf_user;
-			exit;
-		}
-	}
-	return false;
-}
-function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams){
-	
-	$kf_user=knowledgefox_is_in_kfuserslist($mdluser->username,$kf_users);
-	global $mess;
-	if ($kf_user){
-		$mess.="<br>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id".$kf_user->userId;
-		if (knowledgefox_user_is_ingroup($kf_user,$kfgroup->title)){
-			$mess.= "<br>Benutzer ".$mdluser->username." ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben";
-			return true;
-		}else{
-			$mess.= "<br>Der Benutzer ".$mdluser->username." ist nicht eingeschreiben in der Gruppe".$kfgroup->title;
-			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
-		}
-	}else{
-		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
-					return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
-		}
-		
-	}
-	
-}
 /*Webservice functions */
-function knowledgefox_ws_get_kfusers($wsparams){
- 	global $mess;
+function knowledgefox_ws_get_kfuser($user,$wsparams){
+ 	
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users?projection=import");
 	curl_setopt($ch, CURLOPT_HEADER, true);
@@ -155,18 +88,19 @@ function knowledgefox_ws_get_kfusers($wsparams){
 	//$info = curl_getinfo($ch);
 	if ($wsparams->LOCALH) $output='#####HTTP/1.1 200 OK Date: Mon, 27 Nov 2017 10:31:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=3CB1655F86BA94B791D14A78D29E3150; Path=/KnowledgePulse/; Secure; HttpOnly X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Transfer-Encoding: chunked Content-Type: application/json [ { "userId" : 16, "username" : "gsadmin", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 17, "username" : "kfoxadmin", "roleId" : 8, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 18, "username" : "m.freisitzer", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 19, "username" : "gcholewa", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 22, "username" : "fischer", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse","KnowledgeApp", "public content" ] }, { "userId" : 27, "username" : "test1", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 37, "username" : "dangerer", "roleId" : 5, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 38, "username" : "gtn_support", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 39, "username" : "gtnuser2", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] } ]';
 	curl_close($ch);
-	if (knowledgefox_output_get_json_statuscode($output)==200){
-		$output=knowledgefox_output_get_json_content($output);
-		$kf_users=json_decode($output);
-		return $kf_users;
-	}else{
-		$mess.=knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
-		return false;
+	$output=knowledgefox_output_get_json_content($output);
+	$kf_users=json_decode($output);
+	foreach ($kf_users as $kf_user){
+		if ($kf_user->username==$user->username) {
+			return $kf_user;
+			exit;
+		}
 	}
+	return false;
 }
 
 function knowledgefox_ws_get_kfgroup($uid,$wsparams){
-	global $mess;
+
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$uid);
 
@@ -181,54 +115,55 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 	
 	//$info = curl_getinfo($ch);
 	if ($wsparams->LOCALH) $output= 'chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
-	//$output=knowledgefox_output_get_json_content($output);
-	if (knowledgefox_output_get_json_statuscode($output)==200){
-		$kf_groups=json_decode(knowledgefox_output_get_json_content($output));
-		if ($kf_groups) {
-			$kf_group=new stdClass();
-			$kf_group->title=$kf_groups[0]->title;
-			$kf_group->groupId=$kf_groups[0]->groupId;
-				return $kf_group;
-		}
-		else{	return -1;}
-	}else{
-		$mess.=knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
-		return false;
+	$output=knowledgefox_output_get_json_content($output);
+	$kf_groups=json_decode($output);
+	if ($kf_groups) {
+		$kf_group=new stdClass();
+		$kf_group->title=$kf_groups[0]->title;
+		$kf_group->groupId=$kf_groups[0]->groupId;
+			return $kf_group;
 	}
+	else{	return -1;}
 }
 
-function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
-  global $mess;
+function knowledgefox_ws_kfenroluser($kf_user,$kf_lernpaket,$wsparams){
+
 	$ch = curl_init();
 	//curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users/".$kf_user->userId);
-	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users/".$kf_user->userId."/groups/".$kf_groupId);
+	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users/".$kf_user->userId."/groups");
 
 
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
-	curl_setopt($ch, CURLOPT_PUT, 1);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	$usera=array();
+	//$ugroupname=$kf_user->groupTitles;
+	//$ugroupname[]=$kf_grouptitle;
+	$usera["uid"]=$kf_lernpaket;
+	$data_string = json_encode($usera);
+	curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 	/*[{"groupId" : 1, "uid" : "123456789abcdef0123456789abcdef0", "title" :
 "public content"}]*/
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	
 	$output = curl_exec($ch);
-
 	curl_close($ch);
-	if ($wsparams->LOCALH) $output="HTTP/1.1 405 Method Not Allowed Date: Wed, 06 Dec 2017 10:15:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=60F8066F97A941B90F4431B6EA2AE8FB; Path=/KnowledgePulse/; Secure; HttpOnly Allow: DELETE,OPTIONS,PUT X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Content-Length: 0 Connection: close ";
-	if (knowledgefox_output_get_json_statuscode($output)==100){
-		$mess.="<br>Der Benutzer ".$kf_user->userId." wurde in die Gruppe ".$kf_groupId." eingeschrieben oder war bereits eingeschrieben";
-		return true;
-	}else{
-		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
-		return false;
-	}
-
+	echo "<hr>";
+	echo $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users/".$kf_user->userId."/groups/".$kf_lernpaket;
+	echo "<hr>";
+	//echo $data_string;
+	echo $output;
+	echo "<hr>";
+	$info = curl_getinfo($ch);
+	echo $info;
+	
+	return true;
 }
 
-function knowledgefox_ws_kfadduser($mdluser,$wsparams){
-  global $mess;
+function knowledgefox_ws_kfadduser($mdl_user,$wsparams){
+
 	$ch = curl_init();
 
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users");
@@ -238,12 +173,9 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
 	curl_setopt($ch, CURLOPT_POST, 1);
 	$usera=array();
-	$usera["username"]=$mdluser->username;
+	$usera["username"]=$mdl_user->username;
 	$usera["password"]="zufallspasswort";
-	$usera["email"]=$mdluser->email;
-	$usera["username"]=$mdluser->username;
-	$usera["lastname"]=$mdluser->lastname;
-	$usera["firstname"]=$mdluser->firstname;
+	$usera["email"]=$mdl_user->email;
 	$usera["provider"]="MOODLE";
 	$data_string = json_encode($usera);
 	curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
@@ -251,14 +183,6 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	curl_close($ch);
-	if (knowledgefox_output_get_json_statuscode($output)==201){
-		$mess.= "<br>Der Benutzer ".$mdluser->username." wurde angelegt";
-		$output=knowledgefox_output_get_json_content($output);
-		$kf_user=json_decode($output);
-		return $kf_user;
-	}else{
-		$mess.= "<br>Der Benutzer ".$mdluser->username." konnte nicht bei Knowledgefox angelegt werden.";
-		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
-		return false;
-	}
+	
+	return true;
 }

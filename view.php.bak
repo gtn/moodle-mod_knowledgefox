@@ -15,8 +15,7 @@ if (empty($wsparams->knowledgefoxserver)) {
 	$wsparams->knowledgefoxserver="https://knowledgefox.net";
 }
 
-global $USER;global $mess;
-$mess="";
+global $USER;
 $id = optional_param('id', 0, PARAM_INT);    // Course Module ID, or
 $l = optional_param('l', 0, PARAM_INT);     // knowledgefox ID
 if ($id) {
@@ -55,20 +54,7 @@ require_login($course, true, $cm);
 
 
 if (knowledgefox_is_teacher($course->id,$USER->id)){
-	//echo '<h2>Users zu exportieren</h2>';*/
-	//echo '<pre>';
-	//var_dump($enrolledUsers);
-
-	$students=knowledgefox_get_students_by_course($course->id);
-	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
-	$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-	foreach ($students as $student){
-		doUserCheck($kf_users,$student,$kfgroup,$wsparams);
-	
-	}
-	//echo '</pre>';
-
-
+	echo "ich bin lehrer";
 	//grading
 		/*$grading=knowledgefox_grade_update($knowledgefox, (object)[
 		'rawgrade' => 9,
@@ -78,17 +64,8 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 }
 if (knowledgefox_is_student($course->id,$USER->id)){
 	//user existiert auf knowledgefox?
-	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
-	//print_r($kf_users);
-	$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-
-	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams)){
-		$mess.= '<br> <a href="'.$wsparams->knowledgefoxserver.'">weiter</a> zu knowledgefox';
-	}
 	
-	/*
-	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
-	$kf_user=knowledgefox_is_in_kfuserslist($USER->username,$kf_users);
+	$kf_user=knowledgefox_ws_get_kfuser($USER,$wsparams);
 	$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
 	if ($kf_user){
 		echo "Dieser Benutzer existiert in Knowledgefox und hat die id".$kf_user->userId;
@@ -98,7 +75,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 			echo $link2kfox;
 		}else{
 			echo "Der Benutzer ist nicht eingeschreiben in gruppe".$kfgroup->title;
-			if (knowledgefox_ws_kfenroluser($kf_user,$knowledgefox->lernpaket,$wsparams)){
+			if (knowledgefox_ws_kfenroluser($kf_user,$kfgroup->title,$wsparams)){
 				echo "einschreibung wurde gemacht";
 				echo $link2kfox;
 			}else{
@@ -118,13 +95,12 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 			echo "Der Benutzer konnte nicht bei Knowledgefox angelegt werden.";
 		}
 		
-	}*/
+	}
 	
 }
-echo $mess;
 //$usercontext = context_user::instance($user->id);
 
-/*$enrolledUsers = $DB->get_records_sql("
+$enrolledUsers = $DB->get_records_sql("
 	SELECT user.id, user.firstname, user.lastname, user.email, course.fullname, knowledgefox.lernpaket
 	FROM {user} user
 	JOIN {user_enrolments} enrolment ON enrolment.userid=user.id
@@ -132,9 +108,10 @@ echo $mess;
 	JOIN {course} course ON course.id=enrol.courseid
 	JOIN {knowledgefox} knowledgefox ON knowledgefox.course=course.id
 	GROUP BY user.id
-");*/
+");
 
-
-
-
+echo '<h2>Users zu exportieren</h2>';
+echo '<pre>';
+//var_dump($enrolledUsers);
+echo '</pre>';
 

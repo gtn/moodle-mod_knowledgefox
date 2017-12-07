@@ -75,14 +75,13 @@ $capabilities = array(
 						'student' => CAP_ALLOW
 				)
 		),
-		'mod/knowledgefox:addinstance' => array(
+		'mod/knowledgefox::myaddinstance' => array(
 				'captype' => 'write',
-				'contextlevel' => CONTEXT_BLOCK,
+				'contextlevel' => CONTEXT_SYSTEM,
 				'archetypes' => array(
-						'editingteacher' => CAP_ALLOW,
-						'manager' => CAP_ALLOW
+						'user' => CAP_PREVENT
 				),
-				'clonepermissionsfrom' => 'moodle/site:manageblocks'
+				'clonepermissionsfrom' => 'moodle/my:manageblocks'
 		)
 );
 

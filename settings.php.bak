@@ -1,0 +1,35 @@
+ <?php
+
+
+defined('MOODLE_INTERNAL') || die;
+
+if (!class_exists('block_exacomp_admin_setting_scheme')) {
+class knowledgefox_admin_setting_configpasswordunmask extends admin_setting_configpasswordunmask {
+		// check needed, because moodle includes this file twice
+	
+
+		public function write_setting($data) {
+			print_r($data);
+			$ret = parent::write_setting($data);
+		   echo $ret;
+			if ($ret != '') {
+				return $ret;
+			}
+
+		//functionsaufruf hier machen
+
+			return '';
+		}
+	}
+}
+	
+$settings->add(new admin_setting_configtext('knowledgefox/knowledgefoxserver', 'Server Url Knowledgefox',
+	'Server Url Knowledgefox2', "https://knowledgefox.net", PARAM_URL));
+	
+	$settings->add(new admin_setting_configtext('knowledgefox/knowledgeauthuser', 'Benutzername',
+	'Benutzer bei Knowledgefox mit erweiterten Rechten zum Anlegen von Benutzern und Gruppenzuordnung', "", PARAM_TEXT));
+		$settings->add(new knowledgefox_admin_setting_configpasswordunmask('knowledgefox/knowledgeauthpwd', 'Passwort',
+	'', "", PARAM_TEXT));
+	
+
+	?>
