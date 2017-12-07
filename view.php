@@ -1,6 +1,10 @@
 <?php
 
 require_once("inc.php");
+
+
+
+
 $wsparams=new stdClass();
 if ($_SERVER['HTTP_HOST']=="localhost"){
 	$wsparams->LOCALH=true;
@@ -15,7 +19,7 @@ if (empty($wsparams->knowledgefoxserver)) {
 	$wsparams->knowledgefoxserver="https://knowledgefox.net";
 }
 
-global $USER;global $mess;
+global $USER;global $mess;global $PAGE;
 $mess="";
 $id = optional_param('id', 0, PARAM_INT);    // Course Module ID, or
 $l = optional_param('l', 0, PARAM_INT);     // knowledgefox ID
@@ -45,7 +49,11 @@ if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 
 require_login($course, true, $cm);
 
-//print_r($knowledgefox);
+$PAGE->set_title("das ist mein titel");
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header();
+
+
 
 
 //knowledgefox_grade_update($knowledgefox, (object)['rawgrade' => 10,	'userid' => 3,]);
@@ -54,6 +62,8 @@ require_login($course, true, $cm);
 //else if student show link to gtn.knowledgefox.at
 
 
+$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
+$mess=".<h2>Knowledgefox Gruppe ".$kfgroup->title."</h2>";
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	//echo '<h2>Users zu exportieren</h2>';*/
 	//echo '<pre>';
@@ -61,7 +71,7 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 
 	$students=knowledgefox_get_students_by_course($course->id);
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
-	$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
+	
 	foreach ($students as $student){
 		doUserCheck($kf_users,$student,$kfgroup,$wsparams);
 	
@@ -80,7 +90,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 	//user existiert auf knowledgefox?
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	//print_r($kf_users);
-	$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
+	
 
 	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams)){
 		$mess.= '<br> <a href="'.$wsparams->knowledgefoxserver.'">weiter</a> zu knowledgefox';
@@ -134,6 +144,7 @@ echo $mess;
 	GROUP BY user.id
 ");*/
 
+echo $OUTPUT->footer();
 
 
 
