@@ -180,7 +180,7 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 	curl_close($ch);
 	
 	//$info = curl_getinfo($ch);
-	if ($wsparams->LOCALH) $output= 'chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
+	if ($wsparams->LOCALH) $output= 'HTTP/1.1 200 chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
 	//$output=knowledgefox_output_get_json_content($output);
 	if (knowledgefox_output_get_json_statuscode($output)==200){
 		$kf_groups=json_decode(knowledgefox_output_get_json_content($output));
