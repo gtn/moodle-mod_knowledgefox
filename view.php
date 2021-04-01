@@ -112,7 +112,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 				echo "einschreibung wurde gemacht";
 				echo $link2kfox;
 			}else{
-				echo "keine Einschreibung möglich";
+				echo "keine Einschreibung mï¿½glich";
 			}
 		}
 	}else{
@@ -122,7 +122,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 				echo "einschreibung wurde gemacht";
 				echo $link2kfox;
 			}else{
-				echo "keine Einschreibung möglich";
+				echo "keine Einschreibung mï¿½glich";
 			}
 		}else{
 			echo "Der Benutzer konnte nicht bei Knowledgefox angelegt werden.";

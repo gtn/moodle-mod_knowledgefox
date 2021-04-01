@@ -132,7 +132,8 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams){
 			return true;
 		}else{
 			$mess.= "<br>Der Benutzer ".$mdluser->username." ist nicht eingeschreiben in der Gruppe".$kfgroup->title;
-			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
+			//return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
+            return true;
 		}
 	}else{
 		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
@@ -153,14 +154,14 @@ function knowledgefox_ws_get_kfusers($wsparams){
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	//$info = curl_getinfo($ch);
-	if ($wsparams->LOCALH) $output='#####HTTP/1.1 200 OK Date: Mon, 27 Nov 2017 10:31:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=3CB1655F86BA94B791D14A78D29E3150; Path=/KnowledgePulse/; Secure; HttpOnly X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Transfer-Encoding: chunked Content-Type: application/json [ { "userId" : 16, "username" : "gsadmin", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 17, "username" : "kfoxadmin", "roleId" : 8, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 18, "username" : "m.freisitzer", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 19, "username" : "gcholewa", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 22, "username" : "fischer", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse","KnowledgeApp", "public content" ] }, { "userId" : 27, "username" : "test1", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 37, "username" : "dangerer", "roleId" : 5, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 38, "username" : "gtn_support", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 39, "username" : "gtnuser2", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] } ]';
+	if ($wsparams->LOCALH) $output='#####HTTP/1.1 200 OK Date: Mon, 27 Nov 2017 10:31:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=3CB1655F86BA94B791D14A78D29E3150; Path=/KnowledgePulse/; Secure; HttpOnly X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Transfer-Encoding: chunked Content-Type: application/json [ { "userId" : 16, "username" : "gsadmin", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 17, "username" : "kfoxadmin", "roleId" : 8, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 31258, "username" : "fpernegger@gtn-solutions.com", "roleId" : 7, "groupTitles" : [ "private@fpernegger@gtn-solutions.com", "public content" ] }, { "userId" : 31471, "username" : "schueler1", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 22, "username" : "fischer", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse","KnowledgeApp", "public content" ] }, { "userId" : 27, "username" : "test1", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] }, { "userId" : 37, "username" : "dangerer", "roleId" : 5, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 38, "username" : "gtn_support", "roleId" : 1, "groupTitles" : [ "Ernährungsfüchse", "KnowledgeApp", "public content" ] }, { "userId" : 39, "username" : "gtnuser2", "roleId" : 1, "groupTitles" : [ "KnowledgeApp", "public content" ] } ]';
 	curl_close($ch);
 	if (knowledgefox_output_get_json_statuscode($output)==200){
 		$output=knowledgefox_output_get_json_content($output);
 		$kf_users=json_decode($output);
 		return $kf_users;
 	}else{
-		$mess.=knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
+		$mess.="screwed up" . knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
 		return false;
 	}
 }
@@ -230,7 +231,6 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 function knowledgefox_ws_kfadduser($mdluser,$wsparams){
   global $mess;
 	$ch = curl_init();
-
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users");
 
 	curl_setopt($ch, CURLOPT_HEADER, true);
@@ -258,7 +258,7 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 		return $kf_user;
 	}else{
 		$mess.= "<br>Der Benutzer ".$mdluser->username." konnte nicht bei Knowledgefox angelegt werden.";
-		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
+		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
 		return false;
 	}
 }
