@@ -63,18 +63,20 @@ echo $OUTPUT->header();
 
 
 $kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-$mess=".<h2>Knowledgefox Gruppe ".$kfgroup->title."</h2>";
+$mess=".<h2>Knowledgefox Gruppe '".$kfgroup->title."'</h2>";
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	//echo '<h2>Users zu exportieren</h2>';*/
 	//echo '<pre>';
 	//var_dump($enrolledUsers);
-
+	
+	//get all students from this course
 	$students=knowledgefox_get_students_by_course($course->id);
+	//get all users from knowledgefox (all groups)
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	
 	foreach ($students as $student){
+		//check if user exists in knowledgefox. If not, create user in Knowledgefox with webservice and enrole user in knowledgefox in the current group
 		doUserCheck($kf_users,$student,$kfgroup,$wsparams);
-	
 	}
 	//echo '</pre>';
 
@@ -95,7 +97,14 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams)){
 		$mess.= '<br> <a href="'.$wsparams->knowledgefoxserver.'">weiter</a> zu knowledgefox';
 	}
-	
+	$kf_completedcourses=knowledgefox_ws_get_user_grading($knowledgefox->lernpaket,$wsparams);
+	if (is_array($kf_completedcourses)) {
+		foreach($kf_completedcourses as $kf_completedcourse){
+				$completiondate = date('d.m.Y', $kf_completedcourse->completionDate);
+				echo "Benutzer ".$kf_completedcourse->username." hat den Kurs '".$kf_completedcourse->courseTitle."' am ".$completiondate." abgeschlossen. <br>";
+				echo "<hr>";
+		}
+	}
 	/*
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	$kf_user=knowledgefox_is_in_kfuserslist($USER->username,$kf_users);

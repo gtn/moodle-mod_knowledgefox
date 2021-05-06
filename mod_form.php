@@ -25,7 +25,7 @@ class mod_knowledgefox_mod_form extends moodleform_mod {
         }
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $mform->addElement('text', 'lernpaket', 'Lernpaket');
+        $mform->addElement('text', 'lernpaket', 'Lernpaket (GruppenID)');
            $mform->setType('lernpaket', PARAM_TEXT);
         $mform->addRule('lernpaket', $strrequired, 'required', null, 'client');
 
