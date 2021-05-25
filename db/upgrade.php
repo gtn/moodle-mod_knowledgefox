@@ -25,7 +25,7 @@ function xmldb_knowledgefox_upgrade($oldversion=0) {
 
     if ($oldversion < 2021051403) {
         $table = new xmldb_table('knowledgefox');
-        $field = new xmldb_field('kursid', XMLDB_TYPE_TEXT, '255', null, XMLDB_NOTNULL, null, 0);
+        $field = new xmldb_field('kursid', XMLDB_TYPE_TEXT, '255', null, XMLDB_NOTNULL, null, "0");
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
