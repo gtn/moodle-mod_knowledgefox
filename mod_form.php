@@ -29,9 +29,9 @@ class mod_knowledgefox_mod_form extends moodleform_mod {
 //           $mform->setType('lernpaket', PARAM_TEXT);
 //        $mform->addRule('lernpaket', $strrequired, 'required', null, 'client');
 
-        $mform->addElement('text', 'kursId', 'kursId (KursID)');
-        $mform->setType('kursId', PARAM_TEXT);
-        $mform->addRule('kursId', $strrequired, 'required', null, 'client');
+        $mform->addElement('text', 'kursid', 'kursId (KursID)');
+        $mform->setType('kursid', PARAM_TEXT);
+        $mform->addRule('kursid', $strrequired, 'required', null, 'client');
 
         // $this->standard_intro_elements(get_string('customintro', 'survey'));
 
