@@ -132,8 +132,7 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams){
 			return true;
 		}else{
 			$mess.= "<br>Der Benutzer ".$mdluser->username." ist nicht eingeschreiben in der Gruppe".$kfgroup->title;
-			//return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
-            return true;
+			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
 	}else{
 		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
@@ -248,7 +247,7 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 	curl_close($ch);
 	if ($wsparams->LOCALH) $output="HTTP/1.1 405 Method Not Allowed Date: Wed, 06 Dec 2017 10:15:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=60F8066F97A941B90F4431B6EA2AE8FB; Path=/KnowledgePulse/; Secure; HttpOnly Allow: DELETE,OPTIONS,PUT X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Content-Length: 0 Connection: close ";
 	if (knowledgefox_output_get_json_statuscode($output)==100){
-		$mess.="<br>Der Benutzer ".$kf_user->userId." wurde in die Gruppe ".$kf_groupId." eingeschrieben oder war bereits eingeschrieben";
+		$mess.="<br>Der Benutzer mit id ".$kf_user->userId." wurde in die Gruppe mit id ".$kf_groupId." eingeschrieben oder war bereits eingeschrieben";
 		return true;
 	}else{
 		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
@@ -290,4 +289,77 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
 		return false;
 	}
+}
+
+function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid){
+    global $mess, $DB;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups");
+
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    $usera=array();
+    $usera["title"]= "Moodle-" . $moodleCourseId . "-" . $kursId;
+    $data_string = json_encode($usera);
+    curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    $output = curl_exec($ch);
+    curl_close($ch);
+    if (knowledgefox_output_get_json_statuscode($output)==201){
+
+        $output=knowledgefox_output_get_json_content($output);
+        $kf_group=json_decode($output);
+        $mess.= "<br>Die Gruppe Moodle-" . $moodleCourseId . "-" . $kursId." wurde angelegt";
+        $groupId = json_decode($output)->groupId;
+        $groupUid = json_decode($output)->uid;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/courses?uid=".$kursId."&projection=id");
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        $output = curl_exec($ch);
+       curl_close($ch);
+        if (knowledgefox_output_get_json_statuscode($output)==200){
+            $mess.= "<br>Die Gruppe wurde gefunden";
+
+            $output=knowledgefox_output_get_json_content($output);
+            $kf_group=json_decode($output);
+
+            $DB->update_record("knowledgefox", array("id" => $activityid, "lernpaket" => $groupUid));
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/courses/".(json_decode($output)->id)."/groups/".$groupId);
+
+            curl_setopt($ch, CURLOPT_HEADER, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+            curl_setopt($ch, CURLOPT_PUT, 1);;
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            $output = curl_exec($ch);
+            curl_close($ch);
+            if (knowledgefox_output_get_json_statuscode($output)==100) {
+                $mess .= "<br>Die Gruppe wurde zugewiesen";
+            }else {
+                $mess .= "<br>Die Gruppe konnte nicht zugewiesen werden";
+                $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+            }
+
+        } else {
+            $mess.= "<br>Die Gruppe wurde nicht gefunden";
+            $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+        }
+        return true;
+    }else{
+        $mess.= "<br>Die Gruppe konnte nicht angelegt werden";
+        $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+        return false;
+    }
+
 }

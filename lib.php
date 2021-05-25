@@ -9,6 +9,7 @@ function knowledgefox_add_instance($kf) {
 	$kf->introformat = '';
 	$kf->timemodified = time();
 
+
 	$kf->id = $DB->insert_record("knowledgefox", $kf);
 
 	knowledgefox_grade_update($kf);

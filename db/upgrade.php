@@ -19,9 +19,21 @@
 
 function xmldb_knowledgefox_upgrade($oldversion=0) {
 
-    global $CFG, $THEME, $db;
-
+    global $CFG, $THEME, $DB;
+    $dbman = $DB->get_manager();
     $result = true;
+
+    if ($oldversion < 2021051403) {
+        $table = new xmldb_table('knowledgefox');
+        $field = new xmldb_field('kursid', XMLDB_TYPE_TEXT, '255', null, XMLDB_NOTNULL, null, 0);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Exacomp savepoint reached.
+        upgrade_block_savepoint(true, 2021051403, 'exacomp');
+    }
+
+
 
     return $result;
 }

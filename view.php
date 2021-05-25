@@ -3,23 +3,17 @@
 require_once("inc.php");
 
 
-
+global $USER;global $mess;global $PAGE;global $COURSE; global $OUTPUT; global $DB;
 
 $wsparams=new stdClass();
 if ($_SERVER['HTTP_HOST']=="localhost"){
-	$wsparams->LOCALH=true;
+	$wsparams->LOCALH=false;
 }else{
 	$wsparams->LOCALH=false;
 }
 
-$wsparams->knowledgefoxserver=get_config('knowledgefox', 'knowledgefoxserver');
-$wsparams->knowledgeauthuser=get_config('knowledgefox', 'knowledgeauthuser');
-$wsparams->knowledgeauthpwd=get_config('knowledgefox', 'knowledgeauthpwd');
-if (empty($wsparams->knowledgefoxserver)) {
-	$wsparams->knowledgefoxserver="https://knowledgefox.net";
-}
 
-global $USER;global $mess;global $PAGE;
+
 $mess="";
 $id = optional_param('id', 0, PARAM_INT);    // Course Module ID, or
 $l = optional_param('l', 0, PARAM_INT);     // knowledgefox ID
@@ -45,6 +39,44 @@ if ($l) {
 if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 		print_error('coursemisconf');
 	}
+
+
+
+$serverData = get_config('knowledgefox', 'knowledgefoxserver');
+
+
+$course = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
+if ($course) { // Should always exist, but just in case ...
+    $categoryid = $course->category;
+}
+
+
+$serverData = explode("\r\n", $serverData);
+for($i=0;$i<count($serverData);$i++){
+    $serverData[$i] = explode(";", $serverData[$i]);
+}
+
+$catFound = false;
+foreach($serverData as $data){
+    if($data[3] == $categoryid){
+        $wsparams->knowledgefoxserver=$data[0];
+        $wsparams->knowledgeauthuser=$data[1];
+        $wsparams->knowledgeauthpwd=$data[2];
+        $catFound = true;
+        break;
+    }
+}
+
+if(!$catFound){
+    $wsparams->knowledgefoxserver=$serverData[0][0];
+    $wsparams->knowledgeauthuser=$serverData[0][1];
+    $wsparams->knowledgeauthpwd=$serverData[0][2];
+}
+
+if (empty($wsparams->knowledgefoxserver)) {
+    $wsparams->knowledgefoxserver="https://knowledgefox.net";
+}
+
 	
 
 require_login($course, true, $cm);
@@ -54,8 +86,12 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 
-
-
+// create a new group for the course in kfox
+if($knowledgefox->lernpaket == NULL){
+    knowledgefox_ws_createNewGroup($knowledgefox->kursid, $wsparams, $knowledgefox->course, $cm->instance);
+}
+// get updated lernpaket data
+$knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*', MUST_EXIST);
 //knowledgefox_grade_update($knowledgefox, (object)['rawgrade' => 10,	'userid' => 3,]);
 
 //if teacher go through students and enrole them on gtn.knowledgefox.at
