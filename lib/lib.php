@@ -315,7 +315,8 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
         $kf_group=json_decode($output);
         $mess.= "<br>Die Gruppe Moodle-" . $moodleCourseId . "-" . $kursId." wurde angelegt";
         $groupId = json_decode($output)->groupId;
-        $groupUid = json_decode($output)->uid;
+        $groupUid = json_decode($output)->uid; // hash wert (lernpaket)
+
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/courses?uid=".$kursId."&projection=id");
@@ -326,10 +327,9 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
         $output = curl_exec($ch);
        curl_close($ch);
         if (knowledgefox_output_get_json_statuscode($output)==200){
-            $mess.= "<br>Die Gruppe wurde gefunden";
+            $mess.= "<br>Die KF interne Kursid wurde gefunden";
 
             $output=knowledgefox_output_get_json_content($output);
-            $kf_group=json_decode($output);
 
             $DB->update_record("knowledgefox", array("id" => $activityid, "lernpaket" => $groupUid));
 
@@ -345,14 +345,14 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
             $output = curl_exec($ch);
             curl_close($ch);
             if (knowledgefox_output_get_json_statuscode($output)==100) {
-                $mess .= "<br>Die Gruppe wurde zugewiesen";
+                $mess .= "<br>Der Kurs wurde der Gruppe zugewiesen";
             }else {
-                $mess .= "<br>Die Gruppe konnte nicht zugewiesen werden";
+                $mess .= "<br>Der Kurs konnte der Gruppe nicht zugewiesen werden";
                 $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
             }
 
         } else {
-            $mess.= "<br>Die Gruppe wurde nicht gefunden";
+            $mess.= "<br>Die KF interne Kursid wurde nicht gefunden";
             $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
         }
         return true;

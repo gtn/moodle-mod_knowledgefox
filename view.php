@@ -17,6 +17,8 @@ if ($_SERVER['HTTP_HOST']=="localhost"){
 $mess="";
 $id = optional_param('id', 0, PARAM_INT);    // Course Module ID, or
 $l = optional_param('l', 0, PARAM_INT);     // knowledgefox ID
+
+
 if ($id) {
 	$PAGE->set_url('/mod/knowledgefox/index.php', array('id' => $id));
 }else{
@@ -34,7 +36,7 @@ if ($l) {
         //resource_redirect_if_migrated(0, $id);
         print_error('invalidcoursemodule');
     }
-    $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*', MUST_EXIST);
+    $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*', MUST_EXIST); // cm kommt von mdl_course_modules tabelle
 }
 if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 		print_error('coursemisconf');
@@ -44,7 +46,7 @@ if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 
 $serverData = get_config('knowledgefox', 'knowledgefoxserver');
 
-
+// todo recursive kursbereich pruefen
 $course = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
 if ($course) { // Should always exist, but just in case ...
     $categoryid = $course->category;
@@ -56,6 +58,7 @@ for($i=0;$i<count($serverData);$i++){
     $serverData[$i] = explode(";", $serverData[$i]);
 }
 
+// todo recursive kursbereich pruefen
 $catFound = false;
 foreach($serverData as $data){
     if($data[3] == $categoryid){
@@ -68,13 +71,14 @@ foreach($serverData as $data){
 }
 
 if(!$catFound){
+    $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
     $wsparams->knowledgefoxserver=$serverData[0][0];
     $wsparams->knowledgeauthuser=$serverData[0][1];
     $wsparams->knowledgeauthpwd=$serverData[0][2];
 }
 
 if (empty($wsparams->knowledgefoxserver)) {
-    $wsparams->knowledgefoxserver="https://knowledgefox.net";
+    $mess.="Kein Server vorhanden";
 }
 
 	
@@ -99,7 +103,7 @@ $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*',
 
 
 $kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-$mess=".<h2>Knowledgefox Gruppe '".$kfgroup->title."'</h2>";
+$mess.="<h2>Knowledgefox Gruppe '".$kfgroup->title."'</h2>";
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	//echo '<h2>Users zu exportieren</h2>';*/
 	//echo '<pre>';
