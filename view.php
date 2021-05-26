@@ -48,8 +48,14 @@ $serverData = get_config('knowledgefox', 'knowledgefoxserver');
 
 // todo recursive kursbereich pruefen
 $course = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
-if ($course) { // Should always exist, but just in case ...
-    $categoryid = $course->category;
+$categoryids = array();
+$categoryid = $course->category;
+//var_dump($categoryid);
+while ($categoryid != 0) { // Should always exist, but just in case ...
+    array_push($categoryids, $categoryid);
+    $category = $DB->get_record('course_categories', array('id' => $categoryid), 'id, parent');
+    $categoryid = $category->parent;
+//    var_dump($categoryid);
 }
 
 
@@ -61,14 +67,24 @@ for($i=0;$i<count($serverData);$i++){
 // todo recursive kursbereich pruefen
 $catFound = false;
 foreach($serverData as $data){
-    if($data[3] == $categoryid){
-        $wsparams->knowledgefoxserver=$data[0];
-        $wsparams->knowledgeauthuser=$data[1];
-        $wsparams->knowledgeauthpwd=$data[2];
-        $catFound = true;
+    foreach($categoryids as $categoryid){
+        if($data[3] == $categoryid){
+            $wsparams->knowledgefoxserver=$data[0];
+            $wsparams->knowledgeauthuser=$data[1];
+            $wsparams->knowledgeauthpwd=$data[2];
+            $catFound = true;
+            break;
+        }
+    }
+    if($catFound){
         break;
     }
 }
+
+var_dump($wsparams->knowledgefoxserver);
+var_dump($wsparams->knowledgeauthuser);
+var_dump($wsparams->knowledgeauthpwd);
+die;
 
 if(!$catFound){
     $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
