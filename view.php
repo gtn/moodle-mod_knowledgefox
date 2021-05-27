@@ -47,9 +47,9 @@ if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 $serverData = get_config('knowledgefox', 'knowledgefoxserver');
 
 // todo recursive kursbereich pruefen
-$course = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
+$coursetemp = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
 $categoryids = array();
-$categoryid = $course->category;
+$categoryid = $coursetemp->category;
 //var_dump($categoryid);
 while ($categoryid != 0) { // Should always exist, but just in case ...
     array_push($categoryids, $categoryid);
