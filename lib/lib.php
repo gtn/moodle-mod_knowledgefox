@@ -98,6 +98,25 @@ function knowledgefox_output_get_json_statustext($val){
 	}
 	
 }
+function knowledgefox_output_get_json_errordescription($val){
+	$pos = strpos($val, "\"errors\"");
+	if ($pos === false) {
+	    return false;
+	} else {
+			$pos=$pos+11;
+	    $val=substr($val,$pos);
+	    $posend=strripos($val, "]}");
+	    if ($posend === false) {
+			} else {
+				$val=substr($val,0,$posend-1);
+			}
+			$val=str_replace("\"errorName\""," Fehler",$val);
+			$val=str_replace("\"errorCode\""," Fehlercode",$val);
+			$val=str_replace("\"message\""," Beschreibung",$val);
+	   return ", ".$val.".";
+	}
+	
+}
 function knowledgefox_user_is_ingroup($kf_user,$kfgroupname){
 		foreach($kf_user->groupTitles as $grouptitle){
 			if($grouptitle==$kfgroupname) {return true; exit;}
@@ -126,12 +145,12 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams){
 	$kf_user=knowledgefox_is_in_kfuserslist($mdluser->username,$kf_users);
 	global $mess;
 	if ($kf_user){
-		$mess.="<br>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id".$kf_user->userId;
+		$mess.="<li>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id".$kf_user->userId;
 		if (knowledgefox_user_is_ingroup($kf_user,$kfgroup->title)){
-			$mess.= "<br>Benutzer ".$mdluser->username." ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben";
+			$mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben.</li>";
 			return true;
 		}else{
-			$mess.= "<br>Der Benutzer ".$mdluser->username." ist nicht eingeschreiben in der Gruppe".$kfgroup->title;
+			$mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist nicht eingeschreiben in der Gruppe".$kfgroup->title.".</li>";
 			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
 	}else{
@@ -150,6 +169,7 @@ function knowledgefox_ws_get_kfusers($wsparams){
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	//$info = curl_getinfo($ch);
@@ -160,7 +180,8 @@ function knowledgefox_ws_get_kfusers($wsparams){
 		$kf_users=json_decode($output);
 		return $kf_users;
 	}else{
-		$mess.="screwed up" . knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+		if (is_siteadmin()) $mess.="<br>Statuscode (users?projection=import): " . knowledgefox_output_get_json_statuscode($output);
+		$mess.=knowledgefox_output_get_json_errordescription($output);
 		return false;
 	}
 }
@@ -188,7 +209,7 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		$mess.=knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
+		if (is_siteadmin()) $mess.="<br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output); 
 		return false;
 	}
 }
@@ -202,17 +223,20 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 	//curl_setopt($ch, CURLOPT_POST, 1);
 	//curl_setopt($ch, CURLOPT_USERPWD, "kfoxadmin:d3c11f15644aaef0ba844c5413aa328748b583f2");
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	curl_close($ch);
-	
+	//var_dump($output);die;
 	//$info = curl_getinfo($ch);
 	if ($wsparams->LOCALH) $output= 'HTTP/1.1 200 chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
 	//$output=knowledgefox_output_get_json_content($output);
 	if (knowledgefox_output_get_json_statuscode($output)==200){
+		
 		$kf_groups=json_decode(knowledgefox_output_get_json_content($output));
+
 		if ($kf_groups) {
 			$kf_group=new stdClass();
 			$kf_group->title=$kf_groups[0]->title;
@@ -221,7 +245,8 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		$mess.=knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
+		if (is_siteadmin()) $mess.="<br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output); 
+		$mess.=knowledgefox_output_get_json_errordescription($output);
 		return false;
 	}
 }
@@ -247,10 +272,10 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 	curl_close($ch);
 	if ($wsparams->LOCALH) $output="HTTP/1.1 405 Method Not Allowed Date: Wed, 06 Dec 2017 10:15:37 GMT Server: Apache Strict-Transport-Security: max-age=31536000 Set-Cookie: JSESSIONID=60F8066F97A941B90F4431B6EA2AE8FB; Path=/KnowledgePulse/; Secure; HttpOnly Allow: DELETE,OPTIONS,PUT X-Content-Type-Options: nosniff X-XSS-Protection: 1; mode=block Cache-Control: no-cache, no-store, max-age=0, must-revalidate Pragma: no-cache Expires: 0 Strict-Transport-Security: max-age=31536000 ; includeSubDomains Content-Length: 0 Connection: close ";
 	if (knowledgefox_output_get_json_statuscode($output)==100){
-		$mess.="<br>Der Benutzer mit id ".$kf_user->userId." wurde in die Gruppe mit id ".$kf_groupId." eingeschrieben oder war bereits eingeschrieben";
+		$mess.="<br>Der Benutzer mit id ".$kf_user->userId." wurde in die Gruppe mit id ".$kf_groupId." eingeschrieben!";
 		return true;
 	}else{
-		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output); 
+		if (is_siteadmin()) $mess.="<br>Statuscode (users/".$kf_user->userId."/groups/".$kf_groupId."): ".knowledgefox_output_get_json_statuscode($output); 
 		return false;
 	}
 
@@ -279,14 +304,16 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	curl_close($ch);
+	//var_dump($output);die;
 	if (knowledgefox_output_get_json_statuscode($output)==201){
 		$mess.= "<br>Der Benutzer ".$mdluser->username." wurde angelegt";
 		$output=knowledgefox_output_get_json_content($output);
 		$kf_user=json_decode($output);
 		return $kf_user;
 	}else{
-		$mess.= "<br>Der Benutzer ".$mdluser->username." konnte nicht bei Knowledgefox angelegt werden.";
-		$mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+		$mess.= "<li>Der Benutzer ".$mdluser->username." konnte nicht bei Knowledgefox angelegt werden.";
+		if (is_siteadmin()) $mess.="<br>Statuscode (users):".knowledgefox_output_get_json_statuscode($output);
+		$mess.=knowledgefox_output_get_json_errordescription($output)."</li>";
 		return false;
 	}
 }
@@ -308,7 +335,10 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     $output = curl_exec($ch);
+    
     curl_close($ch);
+    
+
     if (knowledgefox_output_get_json_statuscode($output)==201){
 
         $output=knowledgefox_output_get_json_content($output);
@@ -348,17 +378,20 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
                 $mess .= "<br>Der Kurs wurde der Gruppe zugewiesen";
             }else {
                 $mess .= "<br>Der Kurs konnte der Gruppe nicht zugewiesen werden";
-                $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+                if (is_siteadmin()) $mess.="<br>Statuscode(courses/".(json_decode($output)->id)."/groups/".$groupId."): ".knowledgefox_output_get_json_statuscode($output);
+                $mess.=knowledgefox_output_get_json_errordescription($output);
             }
 
         } else {
             $mess.= "<br>Die KF interne Kursid wurde nicht gefunden";
-            $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+            if (is_siteadmin()) $mess.="<br>Statuscode (courses?uid=".$kursId."&projection=id): ".knowledgefox_output_get_json_statuscode($output);
+            $mess.=knowledgefox_output_get_json_errordescription($output);
         }
         return true;
     }else{
         $mess.= "<br>Die Gruppe konnte nicht angelegt werden";
-        $mess.="<br>".knowledgefox_output_get_json_statuscode($output).knowledgefox_output_get_json_statustext($output);
+        if (is_siteadmin()) $mess.="<br>Statuscode: ".knowledgefox_output_get_json_statuscode($output);
+        $mess.=knowledgefox_output_get_json_errordescription($output);
         return false;
     }
 

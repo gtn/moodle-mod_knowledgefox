@@ -1,5 +1,5 @@
 <?php
-
+	
 require_once("inc.php");
 
 
@@ -17,7 +17,6 @@ if ($_SERVER['HTTP_HOST']=="localhost"){
 $mess="";
 $id = optional_param('id', 0, PARAM_INT);    // Course Module ID, or
 $l = optional_param('l', 0, PARAM_INT);     // knowledgefox ID
-
 
 if ($id) {
 	$PAGE->set_url('/mod/knowledgefox/index.php', array('id' => $id));
@@ -41,6 +40,7 @@ if ($l) {
 if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 		print_error('coursemisconf');
 	}
+
 
 
 
@@ -80,11 +80,8 @@ foreach($serverData as $data){
         break;
     }
 }
+//if (is_siteadmin()) $mess.="<br>Verbindung mit Server ".$wsparams->knowledgefoxserver." und dem Benutzer ".$wsparams->knowledgeauthuser." wird verwendet!";
 
-var_dump($wsparams->knowledgefoxserver);
-var_dump($wsparams->knowledgeauthuser);
-var_dump($wsparams->knowledgeauthpwd);
-die;
 
 if(!$catFound){
     $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
@@ -94,10 +91,8 @@ if(!$catFound){
 }
 
 if (empty($wsparams->knowledgefoxserver)) {
-    $mess.="Kein Server vorhanden";
+    $mess.="<br>Kein Server vorhanden";
 }
-
-	
 
 require_login($course, true, $cm);
 
@@ -119,7 +114,7 @@ $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*',
 
 
 $kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-$mess.="<h2>Knowledgefox Gruppe '".$kfgroup->title."'</h2>";
+$mess.="<h2>Knowledgefox Gruppe ".$kfgroup->title."</h2>";
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	//echo '<h2>Users zu exportieren</h2>';*/
 	//echo '<pre>';
@@ -146,6 +141,7 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 }
 if (knowledgefox_is_student($course->id,$USER->id)){
 	//user existiert auf knowledgefox?
+
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	//print_r($kf_users);
 	
