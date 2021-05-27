@@ -84,7 +84,7 @@ foreach($serverData as $data){
 
 
 if(!$catFound){
-    $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
+    if (is_siteadmin()) $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
     $wsparams->knowledgefoxserver=$serverData[0][0];
     $wsparams->knowledgeauthuser=$serverData[0][1];
     $wsparams->knowledgeauthpwd=$serverData[0][2];

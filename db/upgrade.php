@@ -30,7 +30,7 @@ function xmldb_knowledgefox_upgrade($oldversion=0) {
             $dbman->add_field($table, $field);
         }
         // Exacomp savepoint reached.
-        upgrade_block_savepoint(true, 2021051403, 'exacomp');
+        upgrade_mod_savepoint(true, 2021051403, 'knowledgefox');
     }
 
 
