@@ -145,14 +145,16 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role){
 	$kf_user=knowledgefox_is_in_kfuserslist($mdluser->username,$kf_users);
 	global $mess;
 	if ($kf_user){
-		if ($user_role==1) $mess.="<li>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id: ".$kf_user->userId;
+		$mess.="<li style='padding-top:8px;'>";
+		if ($user_role==1) $mess.="Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id: ".$kf_user->userId;
 		if (knowledgefox_user_is_ingroup($kf_user,$kfgroup->title)){
-			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben.</li>";
+			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben.";
 			return true;
 		}else{
-			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist nicht eingeschreiben in der Gruppe".$kfgroup->title.".</li>";
+			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist nicht eingeschreiben in der Gruppe".$kfgroup->title;
 			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
+		$mess.="</li>";
 	}else{
 		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
 					return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
@@ -245,7 +247,10 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		if (is_siteadmin()) $mess.="<i><br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
+		if (is_siteadmin()){
+			 $mess.="<i><br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
+			 if (knowledgefox_output_get_json_statuscode($output)=="401") $mess.="Server: ".$wsparams->knowledgefoxserver.", User: ".$wsparams->knowledgeauthuser."<br>";
+		}
 		$mess.=knowledgefox_output_get_json_errordescription($output);
 		return false;
 	}
@@ -390,7 +395,10 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
         return true;
     }else{
         $mess.= "<br>Die Gruppe konnte nicht angelegt werden";
-        if (is_siteadmin()) $mess.="<br><i>Statuscode: ".knowledgefox_output_get_json_statuscode($output)."</i>";
+        if (is_siteadmin()) {
+        	$mess.="<br><i>Statuscode (groups): ".knowledgefox_output_get_json_statuscode($output)."</i>";
+        	if (knowledgefox_output_get_json_statuscode($output)=="401") $mess.="<br>Server: ".$wsparams->knowledgefoxserver.", User: ".$wsparams->knowledgeauthuser;
+        }
         $mess.=knowledgefox_output_get_json_errordescription($output);
         return false;
     }
