@@ -140,17 +140,17 @@ function knowledgefox_is_in_kfuserslist($username,$kf_users){
 	}
 	return false;
 }
-function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams){
-	
+function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role){
+	//teacher: $role=1 student: $role=2
 	$kf_user=knowledgefox_is_in_kfuserslist($mdluser->username,$kf_users);
 	global $mess;
 	if ($kf_user){
-		$mess.="<li>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id".$kf_user->userId;
+		if ($user_role==1) $mess.="<li>Der Benutzer ".$mdluser->username." existiert in Knowledgefox und hat die id: ".$kf_user->userId;
 		if (knowledgefox_user_is_ingroup($kf_user,$kfgroup->title)){
-			$mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben.</li>";
+			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist auf Knowledgefox in der Gruppe ".$kfgroup->title." eingeschrieben.</li>";
 			return true;
 		}else{
-			$mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist nicht eingeschreiben in der Gruppe".$kfgroup->title.".</li>";
+			if ($user_role==1) $mess.= "<br>Der Benutzer <b>".$mdluser->username."</b> ist nicht eingeschreiben in der Gruppe".$kfgroup->title.".</li>";
 			return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
 	}else{
@@ -180,7 +180,7 @@ function knowledgefox_ws_get_kfusers($wsparams){
 		$kf_users=json_decode($output);
 		return $kf_users;
 	}else{
-		if (is_siteadmin()) $mess.="<br>Statuscode (users?projection=import): " . knowledgefox_output_get_json_statuscode($output);
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (users?projection=import): " . knowledgefox_output_get_json_statuscode($output)."</i>";
 		$mess.=knowledgefox_output_get_json_errordescription($output);
 		return false;
 	}
@@ -209,7 +209,7 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		if (is_siteadmin()) $mess.="<br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output); 
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
 		return false;
 	}
 }
@@ -245,7 +245,7 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		if (is_siteadmin()) $mess.="<br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output); 
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
 		$mess.=knowledgefox_output_get_json_errordescription($output);
 		return false;
 	}
@@ -275,7 +275,7 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 		$mess.="<br>Der Benutzer mit id ".$kf_user->userId." wurde in die Gruppe mit id ".$kf_groupId." eingeschrieben!";
 		return true;
 	}else{
-		if (is_siteadmin()) $mess.="<br>Statuscode (users/".$kf_user->userId."/groups/".$kf_groupId."): ".knowledgefox_output_get_json_statuscode($output); 
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (users/".$kf_user->userId."/groups/".$kf_groupId."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
 		return false;
 	}
 
@@ -312,7 +312,7 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 		return $kf_user;
 	}else{
 		$mess.= "<li>Der Benutzer ".$mdluser->username." konnte nicht bei Knowledgefox angelegt werden.";
-		if (is_siteadmin()) $mess.="<br>Statuscode (users):".knowledgefox_output_get_json_statuscode($output);
+		if (is_siteadmin()) $mess.="<br><i>Statuscode (users):".knowledgefox_output_get_json_statuscode($output)."</i>";
 		$mess.=knowledgefox_output_get_json_errordescription($output)."</li>";
 		return false;
 	}
@@ -378,19 +378,19 @@ function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $ac
                 $mess .= "<br>Der Kurs wurde der Gruppe zugewiesen";
             }else {
                 $mess .= "<br>Der Kurs konnte der Gruppe nicht zugewiesen werden";
-                if (is_siteadmin()) $mess.="<br>Statuscode(courses/".(json_decode($output)->id)."/groups/".$groupId."): ".knowledgefox_output_get_json_statuscode($output);
+                if (is_siteadmin()) $mess.="<br><i>Statuscode(courses/".(json_decode($output)->id)."/groups/".$groupId."): ".knowledgefox_output_get_json_statuscode($output)."</i>";
                 $mess.=knowledgefox_output_get_json_errordescription($output);
             }
 
         } else {
             $mess.= "<br>Die KF interne Kursid wurde nicht gefunden";
-            if (is_siteadmin()) $mess.="<br>Statuscode (courses?uid=".$kursId."&projection=id): ".knowledgefox_output_get_json_statuscode($output);
+            if (is_siteadmin()) $mess.="<br><i>Statuscode (courses?uid=".$kursId."&projection=id): ".knowledgefox_output_get_json_statuscode($output)."</i>";
             $mess.=knowledgefox_output_get_json_errordescription($output);
         }
         return true;
     }else{
         $mess.= "<br>Die Gruppe konnte nicht angelegt werden";
-        if (is_siteadmin()) $mess.="<br>Statuscode: ".knowledgefox_output_get_json_statuscode($output);
+        if (is_siteadmin()) $mess.="<br><i>Statuscode: ".knowledgefox_output_get_json_statuscode($output)."</i>";
         $mess.=knowledgefox_output_get_json_errordescription($output);
         return false;
     }

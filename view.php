@@ -84,7 +84,7 @@ foreach($serverData as $data){
 
 
 if(!$catFound){
-    if (is_siteadmin()) $mess.= "<h2> Keine Kursbereichsid gefunden, erster Server". $serverData[0][0] ." wurde ausgewählt</h2>";
+    if (is_siteadmin()) $mess.= "<i> Keine Kursbereichsid definiert, erster Server ". $serverData[0][0] ." aus der Pluginkonfiguration wird verwendet.</i>";
     $wsparams->knowledgefoxserver=$serverData[0][0];
     $wsparams->knowledgeauthuser=$serverData[0][1];
     $wsparams->knowledgeauthpwd=$serverData[0][2];
@@ -112,14 +112,16 @@ $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*',
 //if teacher go through students and enrole them on gtn.knowledgefox.at
 //else if student show link to gtn.knowledgefox.at
 
-
+$mess.="<h1>".$knowledgefox->name."</h1>";
 $kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
-$mess.="<h2>Knowledgefox Gruppe ".$kfgroup->title."</h2>";
+
 if (knowledgefox_is_teacher($course->id,$USER->id)){
+	$mess.="<p><i>Knowledgefox Gruppe ".$kfgroup->title."</i></p>";
 	//echo '<h2>Users zu exportieren</h2>';*/
 	//echo '<pre>';
 	//var_dump($enrolledUsers);
-	
+	$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
+	$mess.="<p>Es wird nun geprüft, ob die Teilnehmer*innen dieses Kurses im verknüpften Knowledgefox Kurs eingeschrieben sind. <br> Bei Bedarf wird eine Einschreibung vorgenommen.<br> Es folgen Statusinformationen zu den einzelnen Teilnehmer*innen:</p>";
 	//get all students from this course
 	$students=knowledgefox_get_students_by_course($course->id);
 	//get all users from knowledgefox (all groups)
@@ -127,11 +129,11 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 	
 	foreach ($students as $student){
 		//check if user exists in knowledgefox. If not, create user in Knowledgefox with webservice and enrole user in knowledgefox in the current group
-		doUserCheck($kf_users,$student,$kfgroup,$wsparams);
+		doUserCheck($kf_users,$student,$kfgroup,$wsparams,1);
 	}
 	//echo '</pre>';
 
-
+	$mess.="<br /><p>Teilnehmer*innen sehen an dieser Stelle einen Link zum Knowledgefoxserver</p>";
 	//grading
 		/*$grading=knowledgefox_grade_update($knowledgefox, (object)[
 		'rawgrade' => 9,
@@ -146,10 +148,12 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 	//print_r($kf_users);
 	
 
-	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams)){
-		$mess.= '<br> <a href="'.$wsparams->knowledgefoxserver.'">weiter</a> zu knowledgefox';
+	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams,2)){
+		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
+		$mess.= 'Bitte klicken sie auf <a href="'.$wsparams->knowledgefoxserver.'">"weiter"</a> und sie werden zu Knowledgefox weitergeleitet.</p>'; 
+		$mess.= '<p> <a href="'.$wsparams->knowledgefoxserver.'">Weiter</a> zu Knowledgefox</p>';
 	}
-	$kf_completedcourses=knowledgefox_ws_get_user_grading($knowledgefox->lernpaket,$wsparams);
+	/*$kf_completedcourses=knowledgefox_ws_get_user_grading($knowledgefox->lernpaket,$wsparams);
 	if (is_array($kf_completedcourses)) {
 		foreach($kf_completedcourses as $kf_completedcourse){
 				$completiondate = date('d.m.Y', $kf_completedcourse->completionDate);
@@ -157,6 +161,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 				echo "<hr>";
 		}
 	}
+	*/
 	/*
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	$kf_user=knowledgefox_is_in_kfuserslist($USER->username,$kf_users);
