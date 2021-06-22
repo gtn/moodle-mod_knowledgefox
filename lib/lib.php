@@ -189,9 +189,11 @@ function knowledgefox_ws_get_kfusers($wsparams){
 }
 function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 	global $mess;
+
 	$ch = curl_init();
 	//curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$groupuid);
-  curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?includeTestCompletedNotPassed=true");
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?includeTestCompletedNotPassed=true");
+  //curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?groupId=".$groupuid."&includeTestCompletedNotPassed=true");
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
@@ -322,6 +324,35 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 		return false;
 	}
 }
+
+function knowledgefox_ws_getGroupid($groupuid ,$wsparams){
+    global $mess;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$groupuid);
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+    //curl_setopt($ch, CURLOPT_POST, 1);
+    //curl_setopt($ch, CURLOPT_USERPWD, "kfoxadmin:d3c11f15644aaef0ba844c5413aa328748b583f2");
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    $output = curl_exec($ch);
+    curl_close($ch);
+
+    //$info = curl_getinfo($ch);
+    if ($wsparams->LOCALH) $output= 'HTTP/1.1 200 chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
+
+    if (knowledgefox_output_get_json_statuscode($output)==200){
+        $kf_completedcourses=json_decode(knowledgefox_output_get_json_content($output));
+        if (is_array($kf_completedcourses)) {
+            return $kf_completedcourses;
+        }
+        else{	return -1;}
+    }else{
+        if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
+        return false;
+    }
+}
+
 
 function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid){
     global $mess, $DB;

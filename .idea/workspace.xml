@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1ef68f39-3e97-4abc-b32d-3c51b8d1ec97" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/db/install.xml" beforeDir="false" afterPath="$PROJECT_DIR$/db/install.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/upgrade.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/upgrade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/helper.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/classes/task/getgrades.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db/tasks.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lang/en/knowledgefox.php" beforeDir="false" afterPath="$PROJECT_DIR$/lang/en/knowledgefox.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/lib.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/lib.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mod_form.php" beforeDir="false" afterPath="$PROJECT_DIR$/mod_form.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.php" beforeDir="false" afterPath="$PROJECT_DIR$/settings.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view.php" beforeDir="false" afterPath="$PROJECT_DIR$/view.php" afterDir="false" />
     </list>
@@ -31,7 +31,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../.." />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -66,7 +66,12 @@
       <workItem from="1620292161933" duration="1551000" />
       <workItem from="1620362490404" duration="3687000" />
       <workItem from="1620662181752" duration="13876000" />
-      <workItem from="1621394045595" duration="40148000" />
+      <workItem from="1621394045595" duration="51650000" />
+      <workItem from="1623219462263" duration="1189000" />
+      <workItem from="1623257093227" duration="3592000" />
+      <workItem from="1623472946147" duration="1357000" />
+      <workItem from="1623747307689" duration="609000" />
+      <workItem from="1624264810901" duration="15851000" />
     </task>
     <servers />
   </component>

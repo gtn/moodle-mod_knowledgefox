@@ -100,6 +100,16 @@ $PAGE->set_title("das ist mein titel");
 $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
+////$group = new stdClass();
+////$group = knowledgefox_ws_getGroupid($knowledgefox->lernpaket ,$wsparams);
+////var_dump(knowledgefox_ws_get_user_grading($group[0]->groupId,$wsparams));
+//
+//die;
+//
+//$students = knowledgefox_get_students_by_course($knowledgefox->course);
+//var_dump($students);
+//die;
+
 
 // create a new group for the course in kfox
 if($knowledgefox->lernpaket == NULL){
