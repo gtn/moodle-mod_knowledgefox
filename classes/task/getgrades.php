@@ -76,7 +76,7 @@ class getgrades extends \core\task\scheduled_task {
             }
 
             $group = \mod_knowledgefox\helper::getGroupid($knowledgefox->lernpaket ,$wsparams);
-            $gradings = \mod_knowledgefox\helper::getGradings($group,$wsparams);
+            $gradings = \mod_knowledgefox\helper::getGradings($group->groupId,$wsparams);
 
             $students = \mod_knowledgefox\helper::getStudents($knowledgefox->course);
 

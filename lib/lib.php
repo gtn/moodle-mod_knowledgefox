@@ -192,8 +192,8 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 
 	$ch = curl_init();
 	//curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$groupuid);
-    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?includeTestCompletedNotPassed=true");
-  //curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?groupId=".$groupuid."&includeTestCompletedNotPassed=true");
+  //curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?includeTestCompletedNotPassed=true");
+  curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/coursecompletions?groupId=".$groupuid."&includeTestCompletedNotPassed=true");
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
