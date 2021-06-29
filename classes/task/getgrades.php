@@ -83,7 +83,10 @@ class getgrades extends \core\task\scheduled_task {
             foreach( $students as $student){
                 foreach( $gradings as $grading){
                     if($student->username == $grading->username){
-                        $DB->insert_record("course_modules_completion",array('coursemoduleid' => $coursemoduleId, 'userid' => $student->id, 'completionstate' => 1, 'viewed' => 0, 'timemodified' => time()));
+                        $existing = $DB->get_record('course_modules_completion', array('coursemoduleid' => $coursemoduleId , 'userid' => $student->id));
+                        if(empty($existing)){
+                            $DB->insert_record("course_modules_completion",array('coursemoduleid' => $coursemoduleId, 'userid' => $student->id, 'completionstate' => 1, 'viewed' => 0, 'timemodified' => time()));
+                        }
                     }
                 }
             }
