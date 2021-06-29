@@ -1,9 +1,7 @@
 <?php
 
 namespace mod_knowledgefox;
-
-require_once("lib/lib.php");
-
+require_once dirname(__DIR__).'/lib/lib.php';
 class helper {
 
     public static function getGroupid($groupUid, $wsparams){
