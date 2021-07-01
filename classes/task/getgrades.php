@@ -24,26 +24,7 @@ class getgrades extends \core\task\scheduled_task {
 
         $wsparams = new \stdClass();
         $serverData = get_config('knowledgefox', 'knowledgefoxserver');
-        $knowledgefoxInstances = $DB->get_records('knowledgefox');
-
-        foreach($knowledgefoxInstances as $knowledgefox) {
-
-            // todo recursive kursbereich pruefen
-            $moduleId = $DB->get_field("modules", "id", array("name" => "knowledgefox"));
-            $coursemoduleId = $DB->get_field("course_modules", "id", array("instance" => $knowledgefox->id, "module" => $moduleId));
-
-            $coursetemp = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
-            $categoryids = array();
-            $categoryid = $coursetemp->category;
-
-            while ($categoryid != 0) { // Should always exist, but just in case ...
-                array_push($categoryids, $categoryid);
-                $category = $DB->get_record('course_categories', array('id' => $categoryid), 'id, parent');
-                $categoryid = $category->parent;
-            }
-
-
-            $serverData = explode("\r\n", $serverData);
+        $serverData = explode("\r\n", $serverData);
             for($i=0;$i<count($serverData);$i++){
                 $serverData[$i] = explode(";", $serverData[$i]);
             }
@@ -75,8 +56,28 @@ class getgrades extends \core\task\scheduled_task {
                 $mess.="<br>Kein Server vorhanden";
             }
 
+        $knowledgefoxInstances = $DB->get_records('knowledgefox');
+				
+        foreach($knowledgefoxInstances as $knowledgefox) {
+
+            // todo recursive kursbereich pruefen
+            $moduleId = $DB->get_field("modules", "id", array("name" => "knowledgefox"));
+            $coursemoduleId = $DB->get_field("course_modules", "id", array("instance" => $knowledgefox->id, "module" => $moduleId));
+
+            $coursetemp = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
+            $categoryids = array();
+            $categoryid = $coursetemp->category;
+
+            while ($categoryid != 0) { // Should always exist, but just in case ...
+                array_push($categoryids, $categoryid);
+                $category = $DB->get_record('course_categories', array('id' => $categoryid), 'id, parent');
+                $categoryid = $category->parent;
+            }
+
+
+            
             $group = \mod_knowledgefox\helper::getGroupid($knowledgefox->lernpaket ,$wsparams);
-            $gradings = \mod_knowledgefox\helper::getGradings($group->groupId,$wsparams);
+            $gradings = \mod_knowledgefox\helper::getGradings($group[0]->groupId,$wsparams);
 
             $students = \mod_knowledgefox\helper::getStudents($knowledgefox->course);
 
