@@ -149,12 +149,13 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	//print_r($kf_users);
 	
+	/7https://events.knowledgefox.net/KnowledgePulse/client/auth/moodle
 
 	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams,2)){
 		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
 		$mess.= '<p>Bitte klicken sie unten auf "weiter" und sie werden zu Knowledgefox weitergeleitet.<br>'; 
 		$mess.= 'Auf der aufgerufenen Knowledgefox Anmeldeseite klicken sie bitte auf "Anmelden mit Moodle".</p>';
-		$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'">Weiter</a> zu Knowledgefox.</p>';
+		$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'/KnowledgePulse/client/auth/moodle">Weiter</a> zu Knowledgefox.</p>';
 	}
 	/*$kf_completedcourses=knowledgefox_ws_get_user_grading($knowledgefox->lernpaket,$wsparams);
 	if (is_array($kf_completedcourses)) {
