@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1ef68f39-3e97-4abc-b32d-3c51b8d1ec97" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/classes/helper.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/classes/task/getgrades.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/tasks.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lang/en/knowledgefox.php" beforeDir="false" afterPath="$PROJECT_DIR$/lang/en/knowledgefox.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/helper.php" beforeDir="false" afterPath="$PROJECT_DIR$/classes/helper.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/task/getgrades.php" beforeDir="false" afterPath="$PROJECT_DIR$/classes/task/getgrades.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/lib.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/lib.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view.php" beforeDir="false" afterPath="$PROJECT_DIR$/view.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,7 +28,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../.." />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../webgl" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
