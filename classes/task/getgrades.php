@@ -86,6 +86,11 @@ class getgrades extends \core\task\scheduled_task {
                     if($student->username == $grading->username){
                         $existing = $DB->get_record('course_modules_completion', array('coursemoduleid' => $coursemoduleId , 'userid' => $student->id));
                         if(empty($existing)){
+                            $updateGrade = new StdClass;
+                            $updateGrade->rawgrade = 1;
+                            $updateGrade->feedback = "";
+                            $updateGrade->userid = $student->id;
+                            \mod_knowledgefox\helper::updateGrades($knowledgefox, $updateGrade);
                             $DB->insert_record("course_modules_completion",array('coursemoduleid' => $coursemoduleId, 'userid' => $student->id, 'completionstate' => 1, 'viewed' => 0, 'timemodified' => time()));
                         }
                     }

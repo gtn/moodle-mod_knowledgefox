@@ -101,7 +101,11 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 // TEST INPUT
-
+$updateGrade = new StdClass;
+$updateGrade->rawgrade = 1;
+$updateGrade->feedback = "";
+$updateGrade->userid = $USER->id;
+knowledgefox_grade_update($knowledgefox, $updateGrade);
 
 // create a new group for the course in kfox
 if($knowledgefox->lernpaket == NULL){
@@ -155,7 +159,9 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
 		$mess.= '<p>Bitte klicken sie unten auf "weiter" und sie werden zu Knowledgefox weitergeleitet.<br>'; 
 		$mess.= 'Auf der aufgerufenen Knowledgefox Anmeldeseite klicken sie bitte auf "Anmelden mit Moodle".</p>';
-		$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'/KnowledgePulse/client/auth/moodle">Weiter</a> zu Knowledgefox.</p>';
+		$mess.= '<br><form action="'.$wsparams->knowledgefoxserver.'/KnowledgePulse/client/auth/moodle"><input type="submit" class="btn btn-primary" value="Weiter" /></form>';
+		//$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'">Weiter</a> zu Knowledgefox.</p>';
+
 	}
 	/*$kf_completedcourses=knowledgefox_ws_get_user_grading($knowledgefox->lernpaket,$wsparams);
 	if (is_array($kf_completedcourses)) {

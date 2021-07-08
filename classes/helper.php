@@ -15,4 +15,8 @@ class helper {
     public static function getStudents($course){
         return knowledgefox_get_students_by_course($course);
     }
+
+    public static function updateGrades($knowledgefox, $grade){
+        knowledgefox_grade_update($knowledgefox, $grade);
+    }
 }
