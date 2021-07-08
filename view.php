@@ -152,8 +152,6 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
 	//print_r($kf_users);
-	
-	/7https://events.knowledgefox.net/KnowledgePulse/client/auth/moodle
 
 	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams,2)){
 		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
