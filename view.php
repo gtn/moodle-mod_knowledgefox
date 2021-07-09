@@ -42,57 +42,8 @@ if (!$course = $DB->get_record("course", array("id" => $cm->course))) {
 	}
 
 
+$wsparams = knowledgefox_get_kfox_server($knowledgefox, $wsparams);
 
-
-$serverData = get_config('knowledgefox', 'knowledgefoxserver');
-
-// todo recursive kursbereich pruefen
-$coursetemp = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
-$categoryids = array();
-$categoryid = $coursetemp->category;
-//var_dump($categoryid);
-while ($categoryid != 0) { // Should always exist, but just in case ...
-    array_push($categoryids, $categoryid);
-    $category = $DB->get_record('course_categories', array('id' => $categoryid), 'id, parent');
-    $categoryid = $category->parent;
-//    var_dump($categoryid);
-}
-
-
-$serverData = explode("\r\n", $serverData);
-for($i=0;$i<count($serverData);$i++){
-    $serverData[$i] = explode(";", $serverData[$i]);
-}
-
-// todo recursive kursbereich pruefen
-$catFound = false;
-foreach($serverData as $data){
-    foreach($categoryids as $categoryid){
-        if($data[3] == $categoryid){
-            $wsparams->knowledgefoxserver=$data[0];
-            $wsparams->knowledgeauthuser=$data[1];
-            $wsparams->knowledgeauthpwd=$data[2];
-            $catFound = true;
-            break;
-        }
-    }
-    if($catFound){
-        break;
-    }
-}
-//if (is_siteadmin()) $mess.="<br>Verbindung mit Server ".$wsparams->knowledgefoxserver." und dem Benutzer ".$wsparams->knowledgeauthuser." wird verwendet!";
-
-
-if(!$catFound){
-    if (is_siteadmin()) $mess.= "<i> Keine Kursbereichsid definiert, erster Server ". $serverData[0][0] ." aus der Pluginkonfiguration wird verwendet.</i>";
-    $wsparams->knowledgefoxserver=$serverData[0][0];
-    $wsparams->knowledgeauthuser=$serverData[0][1];
-    $wsparams->knowledgeauthpwd=$serverData[0][2];
-}
-
-if (empty($wsparams->knowledgefoxserver)) {
-    $mess.="<br>Kein Server vorhanden";
-}
 
 require_login($course, true, $cm);
 
@@ -101,11 +52,7 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 // TEST INPUT
-$updateGrade = new StdClass;
-$updateGrade->rawgrade = 1;
-$updateGrade->feedback = "";
-$updateGrade->userid = $USER->id;
-knowledgefox_grade_update($knowledgefox, $updateGrade);
+
 
 // create a new group for the course in kfox
 if($knowledgefox->lernpaket == NULL){

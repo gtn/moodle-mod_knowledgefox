@@ -19,4 +19,8 @@ class helper {
     public static function updateGrades($knowledgefox, $grade){
         knowledgefox_grade_update($knowledgefox, $grade);
     }
+
+    public static function getServer($knowledgefox, $wsparams){
+        return knowledgefox_get_kfox_server($knowledgefox, $wsparams);
+    }
 }

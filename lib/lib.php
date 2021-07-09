@@ -354,84 +354,135 @@ function knowledgefox_ws_getGroupid($groupuid ,$wsparams){
 }
 
 
-function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid){
+function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid)
+{
     global $mess, $DB;
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups");
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver . "/KnowledgePulse/ws/rest/client/3.0/groups");
 
     curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser . ":" . $wsparams->knowledgeauthpwd);
     curl_setopt($ch, CURLOPT_POST, 1);
-    $usera=array();
-    $usera["title"]= "Moodle-" . $moodleCourseId . "-" . $kursId;
+    $usera = array();
+    $usera["title"] = "Moodle-" . $moodleCourseId . "-" . $kursId;
     $data_string = json_encode($usera);
-    curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     $output = curl_exec($ch);
-    
+
     curl_close($ch);
-    
 
-    if (knowledgefox_output_get_json_statuscode($output)==201){
 
-        $output=knowledgefox_output_get_json_content($output);
-        $kf_group=json_decode($output);
-        $mess.= "<br>Die Gruppe Moodle-" . $moodleCourseId . "-" . $kursId." wurde angelegt";
+    if (knowledgefox_output_get_json_statuscode($output) == 201) {
+
+        $output = knowledgefox_output_get_json_content($output);
+        $kf_group = json_decode($output);
+        $mess .= "<br>Die Gruppe Moodle-" . $moodleCourseId . "-" . $kursId . " wurde angelegt";
         $groupId = json_decode($output)->groupId;
         $groupUid = json_decode($output)->uid; // hash wert (lernpaket)
 
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/courses?uid=".$kursId."&projection=id");
+        curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver . "/KnowledgePulse/ws/rest/client/3.0/courses?uid=" . $kursId . "&projection=id");
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+        curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser . ":" . $wsparams->knowledgeauthpwd);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         $output = curl_exec($ch);
-       curl_close($ch);
-        if (knowledgefox_output_get_json_statuscode($output)==200){
-            $mess.= "<br>Die KF interne Kursid wurde gefunden";
+        curl_close($ch);
+        if (knowledgefox_output_get_json_statuscode($output) == 200) {
+            $mess .= "<br>Die KF interne Kursid wurde gefunden";
 
-            $output=knowledgefox_output_get_json_content($output);
+            $output = knowledgefox_output_get_json_content($output);
 
             $DB->update_record("knowledgefox", array("id" => $activityid, "lernpaket" => $groupUid));
 
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/courses/".(json_decode($output)->id)."/groups/".$groupId);
+            curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver . "/KnowledgePulse/ws/rest/client/3.0/courses/" . (json_decode($output)->id) . "/groups/" . $groupId);
 
             curl_setopt($ch, CURLOPT_HEADER, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+            curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser . ":" . $wsparams->knowledgeauthpwd);
             curl_setopt($ch, CURLOPT_PUT, 1);;
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
             $output = curl_exec($ch);
             curl_close($ch);
-            if (knowledgefox_output_get_json_statuscode($output)==100) {
+            if (knowledgefox_output_get_json_statuscode($output) == 100) {
                 $mess .= "<br>Der Kurs wurde der Gruppe zugewiesen";
-            }else {
+            } else {
                 $mess .= "<br>Der Kurs konnte der Gruppe nicht zugewiesen werden";
-                if (is_siteadmin()) $mess.="<br><i>Statuscode(courses/".(json_decode($output)->id)."/groups/".$groupId."): ".knowledgefox_output_get_json_statuscode($output)."</i>";
-                $mess.=knowledgefox_output_get_json_errordescription($output);
+                if (is_siteadmin()) $mess .= "<br><i>Statuscode(courses/" . (json_decode($output)->id) . "/groups/" . $groupId . "): " . knowledgefox_output_get_json_statuscode($output) . "</i>";
+                $mess .= knowledgefox_output_get_json_errordescription($output);
             }
 
         } else {
-            $mess.= "<br>Die KF interne Kursid wurde nicht gefunden";
-            if (is_siteadmin()) $mess.="<br><i>Statuscode (courses?uid=".$kursId."&projection=id): ".knowledgefox_output_get_json_statuscode($output)."</i>";
-            $mess.=knowledgefox_output_get_json_errordescription($output);
+            $mess .= "<br>Die KF interne Kursid wurde nicht gefunden";
+            if (is_siteadmin()) $mess .= "<br><i>Statuscode (courses?uid=" . $kursId . "&projection=id): " . knowledgefox_output_get_json_statuscode($output) . "</i>";
+            $mess .= knowledgefox_output_get_json_errordescription($output);
         }
         return true;
-    }else{
-        $mess.= "<br>Die Gruppe konnte nicht angelegt werden";
+    } else {
+        $mess .= "<br>Die Gruppe konnte nicht angelegt werden";
         if (is_siteadmin()) {
-        	$mess.="<br><i>Statuscode (groups): ".knowledgefox_output_get_json_statuscode($output)."</i>";
-        	if (knowledgefox_output_get_json_statuscode($output)=="401") $mess.="<br>Server: ".$wsparams->knowledgefoxserver.", User: ".$wsparams->knowledgeauthuser;
+            $mess .= "<br><i>Statuscode (groups): " . knowledgefox_output_get_json_statuscode($output) . "</i>";
+            if (knowledgefox_output_get_json_statuscode($output) == "401") $mess .= "<br>Server: " . $wsparams->knowledgefoxserver . ", User: " . $wsparams->knowledgeauthuser;
         }
-        $mess.=knowledgefox_output_get_json_errordescription($output);
+        $mess .= knowledgefox_output_get_json_errordescription($output);
         return false;
     }
+}
+function knowledgefox_get_kfox_server($knowledgefox, $wsparams)
+{
+        global $mess, $DB;
+
+        $coursetemp = $DB->get_record('course', array('id' => $knowledgefox->course), 'id, category');
+        $categoryids = array();
+        $categoryid = $coursetemp->category;
+
+        while ($categoryid != 0) { // Should always exist, but just in case ...
+            array_push($categoryids, $categoryid);
+            $category = $DB->get_record('course_categories', array('id' => $categoryid), 'id, parent');
+            $categoryid = $category->parent;
+        }
+
+
+        $serverData = get_config('knowledgefox', 'knowledgefoxserver');
+        $serverData = explode("\r\n", $serverData);
+        for ($i = 0; $i < count($serverData); $i++) {
+            $serverData[$i] = explode(";", $serverData[$i]);
+        }
+
+// todo recursive kursbereich pruefen
+        $catFound = false;
+        foreach ($serverData as $data) {
+            foreach ($categoryids as $categoryid) {
+                if ($data[3] == $categoryid) {
+                    $wsparams->knowledgefoxserver = $data[0];
+                    $wsparams->knowledgeauthuser = $data[1];
+                    $wsparams->knowledgeauthpwd = $data[2];
+                    $catFound = true;
+                    break;
+                }
+            }
+            if ($catFound) {
+                break;
+            }
+        }
+        if (!$catFound) {
+            if (is_siteadmin()) $mess .= "<i> Keine Kursbereichsid definiert, erster Server " . $serverData[0][0] . " aus der Pluginkonfiguration wird verwendet.</i>";
+            $wsparams->knowledgefoxserver = $serverData[0][0];
+            $wsparams->knowledgeauthuser = $serverData[0][1];
+            $wsparams->knowledgeauthpwd = $serverData[0][2];
+        }
+
+        if (empty($wsparams->knowledgefoxserver)) {
+            $mess .= "<br>Kein Server vorhanden";
+        }
+        return $wsparams;
+    
 
 }
