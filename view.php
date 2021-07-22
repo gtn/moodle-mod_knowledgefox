@@ -104,7 +104,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
 		$mess.= '<p>Bitte klicken sie unten auf "weiter" und sie werden zu Knowledgefox weitergeleitet.<br>'; 
 		$mess.= 'Auf der aufgerufenen Knowledgefox Anmeldeseite klicken sie bitte auf "Anmelden mit Moodle".</p>';
-		$mess.= '<br><form action="'.$wsparams->knowledgefoxserver.'/KnowledgePulse/client/auth/moodle"><input type="submit" class="btn btn-primary" value="Weiter" /></form>';
+        $mess.= '<br><p style="font-size:x-large"> <a target="_blank" class="btn btn-primary" href="'.$wsparams->knowledgefoxserver.'">Weiter</a></p>';
 		//$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'">Weiter</a> zu Knowledgefox.</p>';
 
 	}
