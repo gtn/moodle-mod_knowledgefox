@@ -39,7 +39,9 @@ class backup_knowledgefox_activity_structure_step extends backup_activity_struct
         // Define each element separated
         $knowledgefox = new backup_nested_element('knowledgefox', array('id'), array(
             'name', 'intro', 'introformat', 'timecreated',
-            'timemodified', 'lernpaket', 'kursbereich', 'kursId'));
+            'timemodified', 'lernpaket', 'kursid'));
+
+
 
         // Build the tree
 
@@ -55,6 +57,7 @@ class backup_knowledgefox_activity_structure_step extends backup_activity_struct
         $knowledgefox->annotate_files('mod_knowledgefox', 'intro', null); // This file area hasn't itemid
 
         // Return the root element (knowledgefox), wrapped into standard activity structure
+
         return $this->prepare_activity_structure($knowledgefox);
     }
 }

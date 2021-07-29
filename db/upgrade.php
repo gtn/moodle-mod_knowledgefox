@@ -33,6 +33,18 @@ function xmldb_knowledgefox_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021051403, 'knowledgefox');
     }
 
+    if ($oldversion < 2021072900) {
+        $table = new xmldb_table('knowledgefox');
+        $field = new xmldb_field('kursbereich', XMLDB_TYPE_INTEGER);
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Exacomp savepoint reached.
+        upgrade_mod_savepoint(true, 2021072900, 'knowledgefox');
+    }
+
 
 
     return $result;
