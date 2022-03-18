@@ -25,7 +25,7 @@ class getgrades extends \core\task\scheduled_task {
 
 
         $knowledgefoxInstances = $DB->get_records('knowledgefox');
-				
+
         foreach($knowledgefoxInstances as $knowledgefox) {
 
             $moduleId = $DB->get_field("modules", "id", array("name" => "knowledgefox"));
@@ -33,9 +33,9 @@ class getgrades extends \core\task\scheduled_task {
 
             $wsparams = new \stdClass();
             $wsparams = \mod_knowledgefox\helper::getServer($knowledgefox ,$wsparams);
-            
+
             $group = \mod_knowledgefox\helper::getGroupid(trim($knowledgefox->lernpaket) ,$wsparams);
-            $gradings = \mod_knowledgefox\helper::getGradings($group[0]->groupId,$wsparams);
+            $gradings = \mod_knowledgefox\helper::getGradings($group->groupId,$wsparams);
 
             $students = \mod_knowledgefox\helper::getStudents($knowledgefox->course);
 

@@ -1,5 +1,5 @@
 <?php
-	
+
 require_once("inc.php");
 
 
@@ -31,7 +31,7 @@ if ($l) {
     $cm = get_coursemodule_from_instance('knowledgefox', $knowledgefox->id, $knowledgefox->course, false, MUST_EXIST);
 } else {
     if (!$cm = get_coursemodule_from_id('knowledgefox', $id)) {
-    	
+
         //resource_redirect_if_migrated(0, $id);
         print_error('invalidcoursemodule');
     }
@@ -57,6 +57,13 @@ echo $OUTPUT->header();
 // create a new group for the course in kfox
 if($knowledgefox->lernpaket == NULL){
     knowledgefox_ws_createNewGroup($knowledgefox->kursid, $wsparams, $knowledgefox->course, $cm->instance);
+} else {
+    $kfgroup = knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams, $knowledgefox->kursid, $knowledgefox->course, $cm->instance);
+
+    $kfparts = explode('-', $kfgroup->title);
+    if($kfparts[1] != $knowledgefox->course){
+        knowledgefox_ws_createNewGroup($knowledgefox->kursid, $wsparams, $knowledgefox->course, $cm->instance);
+    }
 }
 // get updated lernpaket data
 $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*', MUST_EXIST);
@@ -66,7 +73,7 @@ $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*',
 //else if student show link to gtn.knowledgefox.at
 
 $mess.="<h1>".$knowledgefox->name."</h1>";
-$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams);
+$kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams, $knowledgefox->kursid, $knowledgefox->course, $cm->instance);
 
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	$mess.="<p><i>Knowledgefox Gruppe ".$kfgroup->title."</i></p>";
@@ -79,7 +86,7 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 	$students=knowledgefox_get_students_by_course($course->id);
 	//get all users from knowledgefox (all groups)
 	$kf_users=knowledgefox_ws_get_kfusers($wsparams);
-	
+
 	foreach ($students as $student){
 		//check if user exists in knowledgefox. If not, create user in Knowledgefox with webservice and enrole user in knowledgefox in the current group
 		doUserCheck($kf_users,$student,$kfgroup,$wsparams,1);
@@ -102,7 +109,7 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 
 	if (doUserCheck($kf_users,$USER,$kfgroup,$wsparams,2)){
 		$mess.= '<p>Dieser Lerninhalt befindet sich auf einem verbundenen Knowledgefox Server.<p>';
-		$mess.= '<p>Bitte klicken sie unten auf "weiter" und sie werden zu Knowledgefox weitergeleitet.<br>'; 
+		$mess.= '<p>Bitte klicken sie unten auf "weiter" und sie werden zu Knowledgefox weitergeleitet.<br>';
 		$mess.= 'Auf der aufgerufenen Knowledgefox Anmeldeseite klicken sie bitte auf "Anmelden mit Moodle".</p>';
         $mess.= '<br><p style="font-size:x-large"> <a target="_blank" class="btn btn-primary" href="'.$wsparams->knowledgefoxserver.'">Weiter</a></p>';
 		//$mess.= '<br><p style="font-size:x-large"> <a target="_blank" href="'.$wsparams->knowledgefoxserver.'">Weiter</a> zu Knowledgefox.</p>';
@@ -148,9 +155,9 @@ if (knowledgefox_is_student($course->id,$USER->id)){
 		}else{
 			echo "Der Benutzer konnte nicht bei Knowledgefox angelegt werden.";
 		}
-		
+
 	}*/
-	
+
 }
 echo $mess;
 //$usercontext = context_user::instance($user->id);

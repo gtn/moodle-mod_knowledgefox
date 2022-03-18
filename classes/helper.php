@@ -5,7 +5,7 @@ require_once dirname(__DIR__).'/lib/lib.php';
 class helper {
 
     public static function getGroupid($groupUid, $wsparams){
-        return knowledgefox_ws_getGroupid($groupUid ,$wsparams);
+        return knowledgefox_ws_get_kfgroup($groupUid ,$wsparams);
     }
 
     public static function getGradings($group, $wsparams){

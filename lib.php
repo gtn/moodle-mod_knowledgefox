@@ -8,7 +8,9 @@ function knowledgefox_add_instance($kf) {
 	$kf->intro = '';
 	$kf->introformat = '';
 	$kf->timemodified = time();
-
+    if ($kfold = $DB->get_record("knowledgefox", array("kursid" => $kf->kursid, "course" => $kf->course))) {
+        $kf->lernpaket = $kfold->lernpaket;
+    }
 
 	$kf->id = $DB->insert_record("knowledgefox", $kf);
 
@@ -34,6 +36,10 @@ function knowledgefox_delete_instance($id) {
 	if (!$kf = $DB->get_record("knowledgefox", array("id" => $id))) {
 		return false;
 	}
+    $wsparams=new stdClass();
+    $wsparams->LOCALH=false;
+
+    knowledgefox_ws_deleteGroup($kf->lernpaket ,knowledgefox_get_kfox_server($kf, $wsparams));
 
 	$result = true;
 

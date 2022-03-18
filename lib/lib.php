@@ -63,7 +63,7 @@ function knowledgefox_output_get_json_content($val){
 			} else {
 				$val=substr($val,0,$posend+1);
 			}
-	    
+
 	}
 	return $val;
 }
@@ -96,7 +96,7 @@ function knowledgefox_output_get_json_statustext($val){
 			}
 	   return ", ".$val.".";
 	}
-	
+
 }
 function knowledgefox_output_get_json_errordescription($val){
 	$pos = strpos($val, "\"errors\"");
@@ -115,7 +115,7 @@ function knowledgefox_output_get_json_errordescription($val){
 			$val=str_replace("\"message\""," Beschreibung",$val);
 	   return ", ".$val.".";
 	}
-	
+
 }
 function knowledgefox_user_is_ingroup($kf_user,$kfgroupname){
 		foreach($kf_user->groupTitles as $grouptitle){
@@ -159,9 +159,9 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role){
 		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
 					return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
-		
+
 	}
-	
+
 }
 /*Webservice functions */
 function knowledgefox_ws_get_kfusers($wsparams){
@@ -202,10 +202,10 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	$output = curl_exec($ch);
 	curl_close($ch);
-	
+
 	//$info = curl_getinfo($ch);
 	if ($wsparams->LOCALH) $output= 'HTTP/1.1 200 chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
-	
+
 	if (knowledgefox_output_get_json_statuscode($output)==200){
 		$kf_completedcourses=json_decode(knowledgefox_output_get_json_content($output));
 		if (is_array($kf_completedcourses)) {
@@ -213,13 +213,13 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 		}
 		else{	return -1;}
 	}else{
-		if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
 		return false;
 	}
 }
 
 
-function knowledgefox_ws_get_kfgroup($uid,$wsparams){
+function knowledgefox_ws_get_kfgroup($uid,$wsparams, $kursId = null, $moodleCourseId = null, $activityid = null){
 	global $mess;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$uid);
@@ -238,8 +238,15 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 	if ($wsparams->LOCALH) $output= 'HTTP/1.1 200 chunked Content-Type: application/json [{"groupId" : 1, "uid" : "1111111111111111123456789abcdef0", "title" : "ErnährungsfüchseTTTT"}]';
 	//$output=knowledgefox_output_get_json_content($output);
 	if (knowledgefox_output_get_json_statuscode($output)==200){
-		
+
 		$kf_groups=json_decode(knowledgefox_output_get_json_content($output));
+        //create new group if deleted
+        if(empty($kf_groups)){
+            if($kursId != null){
+                knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid);
+            }
+
+        }
 
 		if ($kf_groups) {
 			$kf_group=new stdClass();
@@ -250,7 +257,7 @@ function knowledgefox_ws_get_kfgroup($uid,$wsparams){
 		else{	return -1;}
 	}else{
 		if (is_siteadmin()){
-			 $mess.="<i><br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
+			 $mess.="<i><br>Statuscode (groups?uid=".$uid."): ".knowledgefox_output_get_json_statuscode($output)."</i>";
 			 if (knowledgefox_output_get_json_statuscode($output)=="401") $mess.="Server: ".$wsparams->knowledgefoxserver.", User: ".$wsparams->knowledgeauthuser."<br>";
 		}
 		$mess.=knowledgefox_output_get_json_errordescription($output);
@@ -273,7 +280,7 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 	/*[{"groupId" : 1, "uid" : "123456789abcdef0123456789abcdef0", "title" :
 "public content"}]*/
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-	
+
 	$output = curl_exec($ch);
 
 	curl_close($ch);
@@ -282,7 +289,7 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 		$mess.="<br>Der Benutzer mit id ".$kf_user->userId." wurde in die Gruppe mit id ".$kf_groupId." eingeschrieben!";
 		return true;
 	}else{
-		if (is_siteadmin()) $mess.="<i><br>Statuscode (users/".$kf_user->userId."/groups/".$kf_groupId."): ".knowledgefox_output_get_json_statuscode($output)."</i>"; 
+		if (is_siteadmin()) $mess.="<i><br>Statuscode (users/".$kf_user->userId."/groups/".$kf_groupId."): ".knowledgefox_output_get_json_statuscode($output)."</i>";
 		return false;
 	}
 
@@ -325,7 +332,7 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 	}
 }
 
-function knowledgefox_ws_getGroupid($groupuid ,$wsparams){
+/*function knowledgefox_ws_getGroupid($groupuid ,$wsparams){
     global $mess;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups?uid=".$groupuid);
@@ -351,7 +358,7 @@ function knowledgefox_ws_getGroupid($groupuid ,$wsparams){
         if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
         return false;
     }
-}
+}*/
 
 
 function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid)
@@ -456,7 +463,6 @@ function knowledgefox_get_kfox_server($knowledgefox, $wsparams)
             $serverData[$i] = explode(";", $serverData[$i]);
         }
 
-// todo recursive kursbereich pruefen
         $catFound = false;
         foreach ($serverData as $data) {
             foreach ($categoryids as $categoryid) {
@@ -483,6 +489,28 @@ function knowledgefox_get_kfox_server($knowledgefox, $wsparams)
             $mess .= "<br>Kein Server vorhanden";
         }
         return $wsparams;
-    
 
+
+}
+
+function knowledgefox_ws_deleteGroup($groupuid ,$wsparams){
+    global $mess;
+
+    $kfGroup = knowledgefox_ws_get_kfgroup($groupuid,$wsparams);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/groups/" . $kfGroup->groupId);
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    $output = curl_exec($ch);
+    curl_close($ch);
+
+    if (knowledgefox_output_get_json_statuscode($output)==204){
+        return true;
+    }else{
+        return false;
+    }
 }
