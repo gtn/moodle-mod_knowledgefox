@@ -45,6 +45,15 @@ function xmldb_knowledgefox_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2021072900, 'knowledgefox');
     }
 
+    if ($oldversion < 2022040701) {
+        $DB->delete_records('knowledgefox', ['lernpaket' => '']);
+        $DB->delete_records('knowledgefox', ['kursid' => '0']);
+
+
+    // Exacomp savepoint reached.
+        upgrade_mod_savepoint(true, 2022040701, 'knowledgefox');
+    }
+
 
 
     return $result;
