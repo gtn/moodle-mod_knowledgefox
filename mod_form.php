@@ -33,6 +33,9 @@ class mod_knowledgefox_mod_form extends moodleform_mod {
         $mform->setType('kursid', PARAM_TEXT);
         $mform->addRule('kursid', $strrequired, 'required', null, 'client');
 
+        $mform->addElement('text', 'expiration', 'Ablaufzeit (in Tagen)');
+        $mform->setType('expiration', PARAM_INT);
+
         // $this->standard_intro_elements(get_string('customintro', 'survey'));
 
         $this->standard_coursemodule_elements();

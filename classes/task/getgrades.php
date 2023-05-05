@@ -37,9 +37,19 @@ class getgrades extends \core\task\scheduled_task {
             $group = \mod_knowledgefox\helper::getGroupid(trim($knowledgefox->lernpaket) ,$wsparams);
             $gradings = \mod_knowledgefox\helper::getGradings($group->groupId,$wsparams);
 
+
             $students = \mod_knowledgefox\helper::getStudents($knowledgefox->course);
+            $courseid = \mod_knowledgefox\helper::getCourseid($knowledgefox->kursid, $wsparams);
 
             foreach( $students as $student){
+                $userid = \mod_knowledgefox\helper::getKfuser($student, $wsparams);
+                $progress = \mod_knowledgefox\helper::getProgress($courseid, $userid->userId, $wsparams);
+                $updateProgress = new \StdClass;
+                $updateProgress->rawgrade = $progress;
+                $updateProgress->feedback = "";
+                $updateProgress->userid = $student->id;
+
+                \mod_knowledgefox\helper::updateProgress($knowledgefox, $updateProgress);
                 foreach( $gradings as $grading){
                     if($student->username == $grading->username){
                         $existing = $DB->get_record('course_modules_completion', array('coursemoduleid' => $coursemoduleId , 'userid' => $student->id));

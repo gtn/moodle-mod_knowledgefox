@@ -74,6 +74,10 @@ $knowledgefox = $DB->get_record('knowledgefox', array('id'=>$cm->instance), '*',
 
 $mess.="<h1>".$knowledgefox->name."</h1>";
 $kfgroup=knowledgefox_ws_get_kfgroup($knowledgefox->lernpaket,$wsparams, $knowledgefox->kursid, $knowledgefox->course, $cm->instance);
+$output = knowledgefox_ws_get_courseId($knowledgefox->kursid, $wsparams);
+$output = knowledgefox_output_get_json_content($output);
+$kf_group = json_decode($output);
+
 
 if (knowledgefox_is_teacher($course->id,$USER->id)){
 	$mess.="<p><i>Knowledgefox Gruppe ".$kfgroup->title."</i></p>";
@@ -89,7 +93,7 @@ if (knowledgefox_is_teacher($course->id,$USER->id)){
 
 	foreach ($students as $student){
 		//check if user exists in knowledgefox. If not, create user in Knowledgefox with webservice and enrole user in knowledgefox in the current group
-		doUserCheck($kf_users,$student,$kfgroup,$wsparams,1);
+		doUserCheck($kf_users,$student,$kfgroup,$wsparams,1, $knowledgefox->expiration);
 	}
 	//echo '</pre>';
 

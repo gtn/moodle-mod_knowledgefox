@@ -51,6 +51,24 @@ function knowledgefox_grade_update($instance, $grades=null) {
 	return grade_update('mod/knowledgefox', $instance->course, 'mod', 'knowledgefox', $instance->id, 0, $grades, $params);
 }
 
+function knowledgefox_progress_update($instance, $grades=null) {
+    global $CFG;
+    require_once $CFG->libdir.'/gradelib.php';
+
+    $params = array('itemname' => $instance->name);
+    // idnumber = $instance->cmidnumber;
+    $params['gradetype'] = GRADE_TYPE_VALUE;
+    $params['grademax'] = 100;
+    $params['grademin'] = 0;
+
+    if ($grades === 'reset') {
+        $params['reset'] = true;
+        $grades = null;
+    }
+
+    return grade_update('mod/knowledgefox', $instance->course, 'mod', 'knowledgefox', $instance->id, 1, $grades, $params);
+}
+
 function knowledgefox_output_get_json_content($val){
 	$pos = strpos($val, "application/json");
 	if ($pos === false) {
@@ -140,7 +158,7 @@ function knowledgefox_is_in_kfuserslist($username,$kf_users){
 	}
 	return false;
 }
-function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role){
+function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role, $expiration=null){
 	//teacher: $role=1 student: $role=2
 	$kf_user=knowledgefox_is_in_kfuserslist($mdluser->username,$kf_users);
 	global $mess;
@@ -156,7 +174,7 @@ function doUserCheck($kf_users,$mdluser,$kfgroup,$wsparams,$user_role){
 		}
 		$mess.="</li>";
 	}else{
-		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams)){
+		if ($kf_user=knowledgefox_ws_kfadduser($mdluser,$wsparams, $expiration)){
 					return knowledgefox_ws_kfenroluser($kf_user,$kfgroup->groupId,$wsparams);
 		}
 
@@ -216,6 +234,31 @@ function knowledgefox_ws_get_user_grading($groupuid,$wsparams){
 		if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
 		return false;
 	}
+}
+
+function knowledgefox_ws_get_user_progress($courseid, $userid, $wsparams){
+    global $mess;
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/stats/courseprogress?courseId=".$courseid."&userId=". $userid);
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser.":".$wsparams->knowledgeauthpwd);
+
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    $output = curl_exec($ch);
+    curl_close($ch);
+
+    if (knowledgefox_output_get_json_statuscode($output)==200){
+        $output=knowledgefox_output_get_json_content($output);
+        $kf_progress=json_decode($output . '}');
+        return $kf_progress->progressUnweighted;
+    }else{
+        var_dump(knowledgefox_output_get_json_statuscode($output));
+        if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
+        return false;
+    }
 }
 
 
@@ -295,7 +338,7 @@ function knowledgefox_ws_kfenroluser($kf_user,$kf_groupId,$wsparams){
 
 }
 
-function knowledgefox_ws_kfadduser($mdluser,$wsparams){
+function knowledgefox_ws_kfadduser($mdluser,$wsparams, $expiration=null){
   global $mess;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver."/KnowledgePulse/ws/rest/client/3.0/users");
@@ -311,7 +354,8 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
 	$usera["username"]=$mdluser->username;
 	$usera["lastname"]=$mdluser->lastname;
 	$usera["firstname"]=$mdluser->firstname;
-	$usera["provider"]="MOODLE";
+    $usera["expirationDate"]= floor(microtime(true) * 1000) + 86400000 * intval($expiration);
+
 	$data_string = json_encode($usera);
 	curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
@@ -360,6 +404,22 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams){
     }
 }*/
 
+function knowledgefox_ws_get_courseId($kursId, $wsparams){
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $wsparams->knowledgefoxserver . "/KnowledgePulse/ws/rest/client/3.0/courses?uid=" . $kursId . "&projection=id");
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $wsparams->knowledgeauthuser . ":" . $wsparams->knowledgeauthpwd);
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    $output = curl_exec($ch);
+    curl_close($ch);
+
+    $output = knowledgefox_output_get_json_content($output);
+    $kf_kurs = json_decode($output);
+
+    return $kf_kurs->id;
+}
 
 function knowledgefox_ws_createNewGroup($kursId, $wsparams, $moodleCourseId, $activityid)
 {
