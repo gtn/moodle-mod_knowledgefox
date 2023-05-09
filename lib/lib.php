@@ -255,7 +255,6 @@ function knowledgefox_ws_get_user_progress($courseid, $userid, $wsparams){
         $kf_progress=json_decode($output . '}');
         return $kf_progress->progressUnweighted;
     }else{
-        var_dump(knowledgefox_output_get_json_statuscode($output));
         if (is_siteadmin()) $mess.="<i><br>Statuscode (stats/coursecompletions): ".knowledgefox_output_get_json_statuscode($output)."</i>";
         return false;
     }
