@@ -354,7 +354,9 @@ function knowledgefox_ws_kfadduser($mdluser,$wsparams, $expiration=null){
 	$usera["username"]=$mdluser->username;
 	$usera["lastname"]=$mdluser->lastname;
 	$usera["firstname"]=$mdluser->firstname;
-    $usera["expirationDate"]= floor(microtime(true) * 1000) + 86400000 * intval($expiration);
+    if($expiration != null && $expiration > 0){
+        $usera["expirationDate"]= floor(microtime(true) * 1000) + 86400000 * intval($expiration);
+    }
 
 	$data_string = json_encode($usera);
 	curl_setopt($ch,CURLOPT_POSTFIELDS, $data_string);
